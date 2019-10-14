@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.dto.ts",
+    "src/**/*.filter.ts"
+  ]
+}
