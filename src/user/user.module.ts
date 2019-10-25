@@ -1,5 +1,6 @@
-import { Module } from '@nestjs/common';
+import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 import UserController from './user.controller';
 import UserService from './user.service';
@@ -9,7 +10,13 @@ import UserEntity from './user.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([UserEntity, UserRepository])],
   controllers: [UserController],
-  providers: [UserService],
-  exports: [],
+  providers: [
+    UserService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ClassSerializerInterceptor,
+    },
+  ],
+  exports: [UserService, TypeOrmModule],
 })
 export default class UserModule {}

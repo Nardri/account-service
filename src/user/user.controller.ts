@@ -1,37 +1,23 @@
 import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  Post,
+  Controller, Get, Req, UseGuards, 
 } from '@nestjs/common';
-import { ApiUseTags } from '@nestjs/swagger';
+import { Request } from 'express'; // eslint-disable-line
+import { ApiBearerAuth, ApiUseTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 import UserService from './user.service';
-import { UserDTO } from './dto/user.dto';
-import AuthSchemas from '../validations/auth.validation';
+import { UserDTO } from './user.dto';
 
 @ApiUseTags('Accounts')
 @Controller('account')
 export default class UserController {
-  constructor(private readonly userService: UserService) {
-  }
+  constructor(private readonly userService: UserService) {}
 
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Get()
-  async findAll(): Promise<UserDTO[]> {
+  async findAll(@Req() req?: Request): Promise<UserDTO[]> {
+    const { user } = req; // eslint-disable-line
     return this.userService.findAll();
-  }
-
-  @Post('signup')
-  async signUp(@Body() payload: UserDTO): Promise<UserDTO> {
-    const { error, value: validatedPayload } = AuthSchemas
-      .signUp
-      .validate(payload);
-
-    if (error) {
-      throw new BadRequestException(error.message);
-    }
-
-    return this.userService.signUp(validatedPayload);
   }
 }
