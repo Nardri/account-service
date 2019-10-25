@@ -1,7 +1,7 @@
 import { ApiModelProperty } from '@nestjs/swagger';
 import { IsString, IsBoolean } from 'class-validator';
 
-class NewUserDTO implements Readonly<NewUserDTO> {
+export class NewUserDTO implements Readonly<NewUserDTO> {
   @ApiModelProperty()
   @IsString()
   username: string;
@@ -15,12 +15,10 @@ class NewUserDTO implements Readonly<NewUserDTO> {
   password: string;
 }
 
-class UserDTO extends NewUserDTO implements Readonly<UserDTO> {
+export class UserDTO extends NewUserDTO implements Readonly<UserDTO> {
   @IsString()
   id: string;
 
   @IsBoolean()
   isActive: boolean;
 }
-
-export { UserDTO, NewUserDTO };

@@ -6,12 +6,15 @@ import AuthController from '../auth.controller';
 import AuthService from '../auth.service';
 import UserRepository from '../../user/user.repository';
 import UserService from '../../user/user.service';
-import { jwtServiceMock, repositoryMockFactory } from '../../../test/testUtils';
+import { jwtServiceMock, repositoryMockFactory } from '../../../e2e/mocks';
 import { UserDTO } from '../../user/user.dto';
+import constants from '../../config/config.constants';
 
 describe('Auth Controller', () => {
   let controller: AuthController;
   let authService: AuthService;
+  let expected: any;
+  let userLoginPayload: UserDTO;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -32,6 +35,17 @@ describe('Auth Controller', () => {
 
     controller = module.get<AuthController>(AuthController);
     authService = module.get<AuthService>(AuthService);
+
+    userLoginPayload = new UserDTO();
+    userLoginPayload.email = 'example@test.com';
+    userLoginPayload.password = 'Example12';
+
+    expected = {
+      data: {
+        email: 'test@example.com',
+        accessToken: 'JWT-TOKEN',
+      },
+    };
   });
 
   it('should be defined', () => {
@@ -39,43 +53,47 @@ describe('Auth Controller', () => {
   });
 
   it('should return an access token and email on sign up with correct details', async done => {
-    const user = new UserDTO();
-    user.password = 'test-Password12';
-    user.email = 'test@example.com';
-
-    const expected = {
-      data: {
-        email: 'test@example.com',
-        accessToken: 'JWT-TOKEN',
-      },
-    };
-
     jest.spyOn(authService, 'signUp').mockResolvedValue(expected);
-    await controller.signUp(user).then(res => {
+    await controller.signUp(userLoginPayload).then(res => {
       expect(res).toStrictEqual(expected);
       done();
     });
   });
 
   it('should throw an error on sign up with incorrect details', async done => {
-    const user = new UserDTO();
-    user.password = '';
-    user.email = 'test@example.com';
-
-    const expected = {
-      data: {
-        email: 'test@example.com',
-        accessToken: 'JWT-TOKEN',
-      },
-    };
-
+    userLoginPayload.password = '';
     jest.spyOn(authService, 'signUp').mockResolvedValue(expected);
     await controller
-      .signUp(user)
+      .signUp(userLoginPayload)
       .then()
       .catch(err => {
         expect(err.status).toStrictEqual(400);
-        expect(err.message['message']).toStrictEqual('Password is incorrect.');
+        expect(err.message['message']).toStrictEqual(
+          constants.getErrorMsg('USR_04'),
+        );
+        done();
+      });
+  });
+
+  it('should return an access token and email on login with correct details', async done => {
+    jest.spyOn(authService, 'login').mockResolvedValue(expected);
+    await controller.login(userLoginPayload).then(res => {
+      expect(res).toStrictEqual(expected);
+      done();
+    });
+  });
+
+  it('should throw an error on login with incorrect details', async done => {
+    userLoginPayload.password = '';
+    jest.spyOn(authService, 'login').mockResolvedValue(expected);
+    await controller
+      .login(userLoginPayload)
+      .then()
+      .catch(err => {
+        expect(err.status).toStrictEqual(400);
+        expect(err.message['message']).toStrictEqual(
+          constants.getErrorMsg('USR_04'),
+        );
         done();
       });
   });

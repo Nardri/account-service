@@ -1,8 +1,5 @@
-import {
-  Controller, Get, Req, UseGuards, 
-} from '@nestjs/common';
-import { Request } from 'express'; // eslint-disable-line
-import { ApiBearerAuth, ApiUseTags } from '@nestjs/swagger';
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
 import UserService from './user.service';
@@ -14,10 +11,17 @@ export default class UserController {
   constructor(private readonly userService: UserService) {}
 
   @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'The record has been successfully fetched.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized.',
+  })
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  async findAll(@Req() req?: Request): Promise<UserDTO[]> {
-    const { user } = req; // eslint-disable-line
+  async findAll(): Promise<UserDTO[]> {
     return this.userService.findAll();
   }
 }

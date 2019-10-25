@@ -26,4 +26,19 @@ export default class AuthService {
       },
     };
   }
+
+  async login(userPayload: NewUserDTO): Promise<AuthResponse> {
+    const user = await this.userService.login(userPayload);
+    const payload = {
+      id: user.id,
+      email: user.email,
+    };
+
+    return {
+      data: {
+        email: payload.email,
+        accessToken: this.jwtService.sign(payload),
+      },
+    };
+  }
 }

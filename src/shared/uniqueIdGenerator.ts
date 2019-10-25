@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 // https://gist.github.com/mikelehen/3596a30bd69384624c11
 /**
  * Fancy ID generator that creates 20-character string identifiers with the following properties:

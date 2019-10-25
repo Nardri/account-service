@@ -25,4 +25,17 @@ export default class AuthController {
 
     return this.authService.signUp(validatedPayload);
   }
+
+  @Post('login')
+  async login(@Body() payload: UserDTO): Promise<AuthResponse> {
+    const { error, value: validatedPayload } = AuthSchemas.login.validate(
+      payload,
+    );
+
+    if (error) {
+      throw new BadRequestException(error.message);
+    }
+
+    return this.authService.login(validatedPayload);
+  }
 }

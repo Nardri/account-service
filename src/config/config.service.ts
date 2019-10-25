@@ -29,7 +29,7 @@ export default class ConfigService {
         .default('development'),
       PORT: Joi.number().default(3000),
       POSTGRES_DATABASE_URI: Joi.string().required(),
-      DEV_POSTGRES_DATABASE_URI: Joi.string(),
+      DEV_POSTGRES_DATABASE_URI: Joi.string().required(),
       TEST_POSTGRES_DATABASE_URI: Joi.string().required(),
       APP_SECRET: Joi.string().required(),
       SYNCHRONIZE_DB: Joi.boolean().default(false),
@@ -66,15 +66,13 @@ export default class ConfigService {
   }
 
   getDatabaseURI(): string {
-    const env = this.get('NODE_ENV');
+    const env = process.env.NODE_ENV;
     switch (env) {
       case 'test':
         return this.get('TEST_POSTGRES_DATABASE_URI');
 
       case 'development':
-        return this.get('DEV_POSTGRES_DATABASE_URI')
-          ? this.get('DEV_POSTGRES_DATABASE_URI')
-          : this.get('POSTGRES_DATABASE_URI');
+        return this.get('DEV_POSTGRES_DATABASE_URI');
 
       default:
         return this.get('POSTGRES_DATABASE_URI');

@@ -2,7 +2,7 @@ import { ApiModelProperty } from '@nestjs/swagger';
 
 import { ServiceAPIResponse } from '../shared/base/base.interface';
 
-class AuthDTO {
+export class AuthDTO {
   @ApiModelProperty()
   email: string;
 
@@ -10,8 +10,6 @@ class AuthDTO {
   accessToken: string;
 }
 
-class AuthResponse extends ServiceAPIResponse<AuthDTO> {
+export class AuthResponse extends ServiceAPIResponse<AuthDTO> {
   data: AuthDTO;
 }
-
-export { AuthResponse, AuthDTO };

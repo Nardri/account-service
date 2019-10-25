@@ -7,7 +7,7 @@ import UserService from '../user.service';
 import UserEntity from '../user.entity';
 import UserRepository from '../user.repository';
 import { UserDTO } from '../user.dto';
-import { MockType, repositoryMockFactory } from '../../../test/testUtils';
+import { MockType, repositoryMockFactory } from '../../../e2e/mocks';
 
 describe('User Controller without DB Access.', () => {
   let controller: UserController;
