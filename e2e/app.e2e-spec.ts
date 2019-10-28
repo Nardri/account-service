@@ -1,7 +1,7 @@
 import * as request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 
-import { closeAppAndDropDB, createAndMigrateApp } from './testUtils';
+import { closeAppAndDropDB, createAndMigrateApp } from './mocks';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -19,8 +19,7 @@ describe('AppController (e2e)', () => {
       .get('/health')
       .expect(200)
       .expect({
-        status: 'ok'
+        status: 'ok',
       });
   });
 });
-

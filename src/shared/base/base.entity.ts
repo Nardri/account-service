@@ -1,8 +1,4 @@
-import {
-  PrimaryColumn,
-  UpdateDateColumn,
-  CreateDateColumn,
-} from 'typeorm';
+import { PrimaryColumn, UpdateDateColumn, CreateDateColumn } from 'typeorm';
 
 export default abstract class BaseEntity {
   @PrimaryColumn({
@@ -22,4 +18,8 @@ export default abstract class BaseEntity {
     default: () => 'CURRENT_TIMESTAMP',
   })
   updatedAt: Date;
+
+  constructor(partial?: Partial<BaseEntity>) {
+    Object.assign(this, partial);
+  }
 }

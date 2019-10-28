@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as Joi from '@hapi/joi';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { JwtModuleOptions } from '@nestjs/jwt';
 
 export interface EnvConfig {
   [key: string]: string;
@@ -28,9 +29,14 @@ export default class ConfigService {
         .default('development'),
       PORT: Joi.number().default(3000),
       POSTGRES_DATABASE_URI: Joi.string().required(),
+      DEV_POSTGRES_DATABASE_URI: Joi.string().required(),
+      TEST_POSTGRES_DATABASE_URI: Joi.string().required(),
       APP_SECRET: Joi.string().required(),
-      SYNCHRONIZE_DB: Joi.boolean(),
-      LOGGING: Joi.boolean(),
+      SYNCHRONIZE_DB: Joi.boolean().default(false),
+      LOGGING: Joi.boolean().default(false),
+      JWT_EXPIRE_IN: Joi.string().default('1h'),
+      JWT_ISSUER: Joi.string().default('Account-Service'),
+      JWT_SUBJECT: Joi.string().default('Authorization'),
     });
 
     const { error, value: validatedEnvConfig } = envVarsSchema.validate(
@@ -43,7 +49,7 @@ export default class ConfigService {
     return validatedEnvConfig;
   }
 
-  private get(key: string): string {
+  get(key: string): string {
     return this.envConfig[key];
   }
 
@@ -59,19 +65,44 @@ export default class ConfigService {
     return path.join(__dirname, '..', 'migration/**/*{.ts,.js}');
   }
 
+  getDatabaseURI(): string {
+    const env = process.env.NODE_ENV;
+    switch (env) {
+      case 'test':
+        return this.get('TEST_POSTGRES_DATABASE_URI');
+
+      case 'development':
+        return this.get('DEV_POSTGRES_DATABASE_URI');
+
+      default:
+        return this.get('POSTGRES_DATABASE_URI');
+    }
+  }
+
   getTypeOrmConfig(): TypeOrmModuleOptions {
     return {
       type: 'postgres',
-      url: this.get('POSTGRES_DATABASE_URI'),
+      url: this.getDatabaseURI(),
       entities: [this.getEntitiesPath()],
       migrationsTableName: 'migration',
       migrations: [this.getMigrationPath()],
       synchronize: Boolean(this.get('SYNCHRONIZE_DB')),
-      logging: Boolean(this.get('LOGGING')),
+      logging: this.isProduction() ? false : Boolean(this.get('LOGGING')),
       logger: 'advanced-console',
       cli: {
         entitiesDir: 'src/entities',
         migrationsDir: 'src/migration',
+      },
+    };
+  }
+
+  getJWTConfig(): JwtModuleOptions {
+    return {
+      secret: this.get('APP_SECRET'),
+      signOptions: {
+        expiresIn: this.get('JWT_EXPIRE_IN'),
+        issuer: this.get('JWT_ISSUER'),
+        subject: this.get('JWT_SUBJECT'),
       },
     };
   }

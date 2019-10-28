@@ -3,16 +3,13 @@ import { APP_FILTER } from '@nestjs/core';
 
 import AppController from './app.controller';
 import AppService from './app.service';
-import UserModule from '../user/user.module';
-import AllExceptionFilter from '../filters/exception.filter';
-import { BaseSubscriber } from './base.subscriber';
+import AllExceptionFilter from '../shared/filters/exception.filter';
+import BaseSubscriber from '../shared/base/base.subscriber';
 import DatabaseModule from '../shared/database/database.module';
+import AuthModule from '../auth/auth.module';
 
 @Module({
-  imports: [
-    UserModule,
-    DatabaseModule,
-  ],
+  imports: [DatabaseModule, AuthModule],
   controllers: [AppController],
   providers: [
     BaseSubscriber,
@@ -20,7 +17,7 @@ import DatabaseModule from '../shared/database/database.module';
       provide: APP_FILTER,
       useClass: AllExceptionFilter,
     },
-    AppService],
+    AppService,
+  ],
 })
-export default class AppModule {
-}
+export default class AppModule {}

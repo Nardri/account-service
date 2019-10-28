@@ -9,7 +9,7 @@ export default class AppController {
 
   @ApiUseTags('App')
   @Get('/health')
-  @ApiResponse({ status: 200, description: 'API health check'})
+  @ApiResponse({ status: 200, description: 'API health check' })
   async health(): Promise<object> {
     return this.appService.health();
   }
