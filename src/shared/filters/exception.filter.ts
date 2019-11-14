@@ -9,6 +9,7 @@ import {
 import { Request, Response } from 'express';
 
 import ConfigService from '../../config/config.service';
+import constants from '../../config/config.constants';
 
 @Catch()
 export default class AllExceptionFilter implements ExceptionFilter {
@@ -29,14 +30,23 @@ export default class AllExceptionFilter implements ExceptionFilter {
         message:
               exception instanceof Error && !this.configService.isProduction()
                 ? exception.stack
-                : 'Something wen\'t wrong, that\'s all we know',
+                : constants.getErrorMsg('SEV_01'),
       };
 
-    response.status(status).json({
+    const responseBody = {
       statusCode: status,
-      message: exceptionResponse['message'],
+      message: this.statusMessage(status, exceptionResponse['message']),
       path: request.url,
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    response.status(status).json(responseBody);
+  }
+
+  statusMessage(status: number, exceptionResponse: any): string {
+    if (status === 401) {
+      return constants.getErrorMsg('AUTH_01');
+    }
+    return exceptionResponse['message'];
   }
 }

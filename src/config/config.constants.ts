@@ -12,6 +12,7 @@ class ConfigConstants {
       USR_06: 'Unfortunately,this user has be deactivated.',
       USR_07: '"Email" must be a valid email.',
       SEV_01: 'Server error, Please contact the technical team.',
+      AUTH_01: 'You are not authorized to view this endpoint.',
     };
   }
 
