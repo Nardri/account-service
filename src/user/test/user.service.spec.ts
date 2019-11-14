@@ -59,7 +59,7 @@ describe('UserService', () => {
     expect(await service.findOne('-lidjndijw')).toStrictEqual(new UserEntity());
   });
 
-  it('should return create a user', async done => {
+  it('should create a user', async done => {
     jest.spyOn(userRepo, 'countUserOccurrence').mockResolvedValue(0);
 
     await service.create(userSignUpPayload).then(res => {
@@ -73,7 +73,7 @@ describe('UserService', () => {
     });
   });
 
-  it('should return create an error if the user already exists', async done => {
+  it('should return an error if the user already exists', async done => {
     jest.spyOn(userRepo, 'countUserOccurrence').mockResolvedValue(1);
     await service
       .create(userSignUpPayload)
