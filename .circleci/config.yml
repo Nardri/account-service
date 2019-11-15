@@ -5,50 +5,98 @@ version: 2.1
 
 references:
   working_directory: &working_directory
-                       ~/nadri_account_service
+    ~/nadri_account_service
+
+  tmp_working_space: &tmp_working_space
+    ~/nadri_account_service/tmp
+
+  envs: &envs
+    NODE_ENV: test
 
   save_cache: &save_cache
     save_cache:
+      name: 'Saving yarn dependencies'
       paths:
-        - node_modules
-      key: v1-dependencies-{{ checksum "package.json" }}
+        - ~/.cache/yarn
+        - ./node_modules
+      key: yarn-packages-{{ checksum "yarn.lock" }}
 
   restore_cache: &restore_cache
     restore_cache:
+      name: 'Restoring yarn dependencies'
       keys:
-        - v1-dependencies-{{ checksum "package.json" }}
-        # fallback to using the latest cache if no exact match is found
-        - v1-dependencies-
+        - yarn-packages-{{ checksum "yarn.lock" }}
+        - yarn-packages-
+
+  restore_repo: &restore_repo
+    restore_cache:
+      name: 'Restoring Directory'
+      keys:
+        - repo-v1-{{ .Branch }}-{{ .Revision }}
+        - repo-v1-{{ .Branch }}
+        - repo-v1-
+
+  save_repo: &save_repo
+    save_cache:
+      name: 'Saving Directory'
+      key: repo-v1-{{ .Branch }}-{{ .Revision }}
+      paths:
+        - .
+
+  attach_workspace: &attach_workspace
+    attach_workspace:
+      at: *tmp_working_space
 
 commands:
-  wait_for_database:
+  cmd_wait_for_database:
     description: "Waiting for Postgres to be ready."
     steps:
-      - run: dockerize -wait tcp://localhost:5432 -timeout 1m
+      - run: dockerize -wait tcp://database:5432 -timeout 1m
 
-  cc_test_reporter:
+  cmd_download_cc_test_reporter:
     description: "Download and install code climate test report."
     steps:
       - run: mkdir -p tmp/
       - run: curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > /tmp/cc-test-reporter
       - run: chmod +x /tmp/cc-test-reporter
 
-  install_dependencies:
+  cmd_upload_test_reporter:
+    description: "Upload the test coverage."
+    steps:
+      - run: /tmp/cc-test-reporter upload-coverage --input tmp/codeclimate.testreport.json
+
+  cmd_install_yarn_dependencies:
     description: "Install project dependencies"
     steps:
-      - run: yarn install
+      - run: yarn install --frozen-lockfile
 
+  cmd_update_npm:
+    description: "Update npm package and yarn"
+    steps:
+      - run: sudo npm install -g npm@latest
+      - run: curl --compressed -o- -L https://yarnpkg.com/install.sh | bash
+
+  cmd_run_tests:
+    description: "Install project dependencies and run tests"
+    steps:
+      - cmd_install_yarn_dependencies
+      - run: env >> .env
+      - run: /tmp/cc-test-reporter before-build
+      - run: yarn test
+      - run: /tmp/cc-test-reporter format-coverage --input-type lcov --output tmp/codeclimate.testreport.json coverage/lcov.info
 
 executors:
   default_executor:
+    working_directory: *working_directory
+    environment: *envs
     docker:
       # specify the version you desire here
-      - image: circleci/node:12.10.0
+      - image: circleci/node:latest
         environment:
           CC_TEST_REPORTER_ID: ${CC_TEST_REPORTER_ID}
           APP_SECRET: ${APP_SECRET}
-          POSTGRES_DATABASE_URI: ${POSTGRES_DATABASE_URI}
-          TEST_POSTGRES_DATABASE_URI: ${TEST_POSTGRES_DATABASE_URI}
+          POSTGRES_DATABASE_URI: postgres://root:root_5432@database:5432/nadri_account_service_db
+          TEST_POSTGRES_DATABASE_URI: postgres://root:root_5432@database:5432/nadri_account_service_db
           SYNCHRONIZE_DB: ${SYNCHRONIZE_DB}
           LOGGING: ${LOGGING}
           JWT_EXPIRE_IN: ${JWT_EXPIRE_IN}
@@ -59,40 +107,57 @@ executors:
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
-      - image: circleci/postgres:11.5
+      - image: circleci/postgres:latest
+        name: database
         environment:
           POSTGRES_USER: root
           POSTGRES_DB: nadri_account_service_db
-          POSTGRES_PASSWORD: ${DB_PASS}
-
-    working_directory: *working_directory
-
+          POSTGRES_PASSWORD: root_5432
 
 jobs:
   checkout_code:
     executor: default_executor
+    parallelism: 2
     steps:
+      - *restore_repo
       - *restore_cache
       - checkout
+      - cmd_update_npm
       - *save_cache
+      - *save_repo
 
   install_dependencies:
     executor: default_executor
     steps:
+      - *restore_repo
       - *restore_cache
-      - install_dependencies
+      - cmd_install_yarn_dependencies
       - *save_cache
 
   run_tests:
     executor: default_executor
     steps:
+      - *attach_workspace
+      - *restore_repo
       - *restore_cache
-      - run: yarn test
+      - cmd_wait_for_database
+      - cmd_download_cc_test_reporter
+      - cmd_run_tests
+      - persist_to_workspace:
+          root: tmp
+          paths:
+            - codeclimate.testreport.json
 
+  upload_coverage:
+    executor: default_executor
+    steps:
+      - *attach_workspace
+      - cmd_download_cc_test_reporter
+      - cmd_upload_test_reporter
 
 workflows:
   version: 2.1
-  build-test-deploy:
+  build:
     jobs:
       - checkout_code
       - install_dependencies:
@@ -101,3 +166,6 @@ workflows:
       - run_tests:
           requires:
             - install_dependencies
+      - upload_coverage:
+          requires:
+            - run_tests

@@ -1,13 +1,10 @@
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as Joi from '@hapi/joi';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { JwtModuleOptions } from '@nestjs/jwt';
 import { IOAuth2StrategyOptionWithRequest } from 'passport-google-oauth';
 import { ExtractJwt, StrategyOptions } from 'passport-jwt';
-
-import constants from './config.constants';
 
 export interface EnvConfig {
   [key: string]: string;
@@ -22,45 +19,35 @@ export default class ConfigService {
 
   constructor(filePath: string) {
     const config = dotenv.parse(fs.readFileSync(filePath));
-    this.envConfig = ConfigService.validateInput(config);
+    this.envConfig = ConfigService.evalDotEnv(config);
   }
 
-  /**
-   * Ensures all needed variables are set,
-   * and returns the validated JavaScript object
-   * including the applied default values.
-   */
-  private static validateInput(envConfig: EnvConfig): EnvConfig {
-    const envVarsSchema: Joi.ObjectSchema = Joi.object({
-      NODE_ENV: Joi.string()
-        .valid('development', 'production', 'test')
-        .default('development'),
-      PORT: Joi.number().default(3000),
-      POSTGRES_DATABASE_URI: Joi.string().required(),
-      DEV_POSTGRES_DATABASE_URI: Joi.string().required(),
-      TEST_POSTGRES_DATABASE_URI: Joi.string().required(),
-      APP_SECRET: Joi.string().required(),
-      SYNCHRONIZE_DB: Joi.boolean().default(false),
-      LOGGING: Joi.boolean().default(false),
-      JWT_EXPIRE_IN: Joi.string().default('1h'),
-      JWT_ISSUER: Joi.string().default('Account-Service'),
-      JWT_SUBJECT: Joi.string().default('Authorization'),
-      GOOGLE_CLIENT_ID: Joi.string().required(),
-      GOOGLE_CLIENT_SECRET: Joi.string().required(),
-      GOOGLE_CALLBACK_URL: Joi.string().required(),
-    });
-
-    const { error, value: validatedEnvConfig } = envVarsSchema.validate(
-      envConfig,
-    );
-
-    if (error) {
-      throw new Error(`${constants.getErrorMsg('ENV_01')} ${error.message}`);
+  private static evalDotEnv(data: any): any {
+    for (const key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        switch (data[key]) {
+          case 'true' || 'True' || '1':
+            data[key] = true;
+            break;
+          case 'false' || 'False' || '0':
+            data[key] = false;
+            break;
+          case 'null' || '':
+            data[key] = null;
+            break;
+          default:
+            break;
+        }
+        // eslint-disable-next-line no-restricted-globals
+        if (!isNaN(Number(key))) {
+          data[key] = Number(key);
+        }
+      }
     }
-    return validatedEnvConfig;
+    return data;
   }
 
-  get(key: string): string {
+  get(key: string): any {
     return this.envConfig[key];
   }
 
@@ -77,17 +64,10 @@ export default class ConfigService {
   }
 
   getDatabaseURI(): string {
-    const env = process.env.NODE_ENV;
-    switch (env) {
-      case 'test':
-        return this.get('TEST_POSTGRES_DATABASE_URI');
-
-      case 'development':
-        return this.get('DEV_POSTGRES_DATABASE_URI');
-
-      default:
-        return this.get('POSTGRES_DATABASE_URI');
+    if (process.env.NODE_ENV === 'test') {
+      return this.get('TEST_POSTGRES_DATABASE_URI');
     }
+    return this.get('POSTGRES_DATABASE_URI');
   }
 
   getTypeOrmConfig(): TypeOrmModuleOptions {
@@ -97,8 +77,8 @@ export default class ConfigService {
       entities: [this.getEntitiesPath()],
       migrationsTableName: 'migration',
       migrations: [this.getMigrationPath()],
-      synchronize: Boolean(this.get('SYNCHRONIZE_DB')),
-      logging: this.isProduction() ? false : Boolean(this.get('LOGGING')),
+      synchronize: this.get('SYNCHRONIZE_DB'),
+      logging: this.isProduction() ? false : this.get('LOGGING'),
       logger: 'advanced-console',
       cli: {
         entitiesDir: 'src/entities',
