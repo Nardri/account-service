@@ -1,0 +1,103 @@
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+version: 2.1
+
+references:
+  working_directory: &working_directory
+                       ~/nadri_account_service
+
+  save_cache: &save_cache
+    save_cache:
+      paths:
+        - node_modules
+      key: v1-dependencies-{{ checksum "package.json" }}
+
+  restore_cache: &restore_cache
+    restore_cache:
+      keys:
+        - v1-dependencies-{{ checksum "package.json" }}
+        # fallback to using the latest cache if no exact match is found
+        - v1-dependencies-
+
+commands:
+  wait_for_database:
+    description: "Waiting for Postgres to be ready."
+    steps:
+      - run: dockerize -wait tcp://localhost:5432 -timeout 1m
+
+  cc_test_reporter:
+    description: "Download and install code climate test report."
+    steps:
+      - run: mkdir -p tmp/
+      - run: curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > /tmp/cc-test-reporter
+      - run: chmod +x /tmp/cc-test-reporter
+
+  install_dependencies:
+    description: "Install project dependencies"
+    steps:
+      - run: yarn install
+
+
+executors:
+  default_executor:
+    docker:
+      # specify the version you desire here
+      - image: circleci/node:12.10.0
+        environment:
+          CC_TEST_REPORTER_ID: ${CC_TEST_REPORTER_ID}
+          APP_SECRET: ${APP_SECRET}
+          POSTGRES_DATABASE_URI: ${POSTGRES_DATABASE_URI}
+          TEST_POSTGRES_DATABASE_URI: ${TEST_POSTGRES_DATABASE_URI}
+          SYNCHRONIZE_DB: ${SYNCHRONIZE_DB}
+          LOGGING: ${LOGGING}
+          JWT_EXPIRE_IN: ${JWT_EXPIRE_IN}
+          GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+          GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+          GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL}
+
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      - image: circleci/postgres:11.5
+        environment:
+          POSTGRES_USER: root
+          POSTGRES_DB: nadri_account_service_db
+          POSTGRES_PASSWORD: ${DB_PASS}
+
+    working_directory: *working_directory
+
+
+jobs:
+  checkout_code:
+    executor: default_executor
+    steps:
+      - *restore_cache
+      - checkout
+      - *save_cache
+
+  install_dependencies:
+    executor: default_executor
+    steps:
+      - *restore_cache
+      - install_dependencies
+      - *save_cache
+
+  run_tests:
+    executor: default_executor
+    steps:
+      - *restore_cache
+      - run: yarn test
+
+
+workflows:
+  version: 2.1
+  build-test-deploy:
+    jobs:
+      - checkout_code
+      - install_dependencies:
+          requires:
+            - checkout_code
+      - run_tests:
+          requires:
+            - install_dependencies
