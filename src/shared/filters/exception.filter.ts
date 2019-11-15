@@ -47,6 +47,6 @@ export default class AllExceptionFilter implements ExceptionFilter {
     if (status === 401) {
       return constants.getErrorMsg('AUTH_01');
     }
-    return exceptionResponse['message'];
+    return exceptionResponse;
   }
 }

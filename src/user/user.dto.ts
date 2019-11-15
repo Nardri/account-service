@@ -4,7 +4,7 @@ import { IsString, IsBoolean } from 'class-validator';
 export class NewUserDTO implements Readonly<NewUserDTO> {
   @ApiModelProperty()
   @IsString()
-  username: string;
+  username?: string;
 
   @ApiModelProperty({ required: true })
   @IsString()
@@ -12,7 +12,10 @@ export class NewUserDTO implements Readonly<NewUserDTO> {
 
   @ApiModelProperty({ required: true })
   @IsString()
-  password: string;
+  password?: string;
+
+  @IsBoolean()
+  verified: boolean;
 }
 
 export class UserDTO extends NewUserDTO implements Readonly<UserDTO> {

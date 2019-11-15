@@ -8,6 +8,7 @@ import UserService from '../user.service';
 import { NewUserDTO } from '../user.dto';
 import { repositoryMockFactory } from '../../../e2e/mocks';
 import constants from '../../config/config.constants';
+import { IOAuthProfile } from '../user.interface';
 
 describe('UserService', () => {
   let service: UserService;
@@ -15,6 +16,7 @@ describe('UserService', () => {
   let userLoginPayload: NewUserDTO;
   let userSignUpPayload: NewUserDTO;
   let userEntity: UserEntity;
+  let oauthData: IOAuthProfile;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -45,6 +47,11 @@ describe('UserService', () => {
     userEntity.email = 'example@test.com';
     userEntity.password = 'Example12';
     userEntity.isActive = true;
+
+    oauthData = {
+      email: userEntity.email,
+      verified: true,
+    };
   });
 
   it('should be defined', () => {
@@ -73,7 +80,7 @@ describe('UserService', () => {
     });
   });
 
-  it('should return an error if the user already exists', async done => {
+  it('should throw an error if the user already exists', async done => {
     jest.spyOn(userRepo, 'countUserOccurrence').mockResolvedValue(1);
     await service
       .create(userSignUpPayload)
@@ -116,7 +123,20 @@ describe('UserService', () => {
   it('should throw an error if password is incorrect.', async done => {
     jest.spyOn(userRepo, 'findByEmailOrUsername').mockResolvedValue(userEntity);
     jest.spyOn(bcrypt, 'compare').mockResolvedValue(false);
+    await service
+      .login(userLoginPayload)
+      .then()
+      .catch(err => {
+        expect(err).toBeInstanceOf(Error);
+        expect(err.status).toBe(400);
+        expect(err.message.message).toBe(constants.getErrorMsg('USR_01'));
+        done();
+      });
+  });
 
+  it('should throw an error if password field is empty when fetched from database.', async done => {
+    userEntity.password = null;
+    jest.spyOn(userRepo, 'findByEmailOrUsername').mockResolvedValue(userEntity);
     await service
       .login(userLoginPayload)
       .then()
@@ -143,5 +163,25 @@ describe('UserService', () => {
         expect(err.message.message).toBe(constants.getErrorMsg('USR_06'));
         done();
       });
+  });
+
+  it('should return Oauth user data if user already exists', async done => {
+    jest.spyOn(userRepo, 'findByEmailOrUsername').mockResolvedValue(userEntity);
+    await service.handleOauthData(oauthData).then(res => {
+      expect(res).toBeInstanceOf(Object);
+      expect(res.email).toBe(userEntity.email);
+      expect(res.id).toBe(userEntity.id);
+      done();
+    });
+  });
+
+  it('should return create and return a user data if Oauth user is not registered', async done => {
+    jest.spyOn(userRepo, 'findByEmailOrUsername').mockResolvedValue(null);
+    await service.handleOauthData(oauthData).then(res => {
+      expect(res).toBeInstanceOf(Object);
+      expect(res.email).toBe(userEntity.email);
+      expect(res.verified).toBe(oauthData.verified);
+      done();
+    });
   });
 });

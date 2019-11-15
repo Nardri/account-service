@@ -97,4 +97,12 @@ describe('Auth Controller', () => {
         done();
       });
   });
+
+  it('should be defined [google authentication route]', () => {
+    expect(controller.googleLogin).toBeDefined();
+  });
+
+  it('should be defined [google callback route]', () => {
+    expect(controller.googleCallBack).toBeDefined();
+  });
 });

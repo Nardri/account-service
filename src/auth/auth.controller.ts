@@ -1,7 +1,17 @@
 import {
-  BadRequestException, Body, Controller, Post, 
+  BadRequestException,
+  Body,
+  Controller,
+  Post,
+  Get,
+  Req,
+  Res,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiUseTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Request, Response } from 'express';
 
 import { UserDTO } from '../user/user.dto';
 import AuthSchemas from './auth.validation';
@@ -37,5 +47,20 @@ export default class AuthController {
     }
 
     return this.authService.login(validatedPayload);
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleLogin(): Promise<void> {}
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleCallBack(
+    @Req() req: Request & { user: string | any },
+    @Res() res: Response,
+  ): Promise<any> {
+    res.status(200).json({
+      accessToken: req.user.data.accessToken,
+    });
   }
 }

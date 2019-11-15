@@ -14,6 +14,7 @@ describe('AuthService', () => {
   let userService: UserService;
   let expected: any;
   let user: UserDTO;
+  let profile: any;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -44,6 +45,21 @@ describe('AuthService', () => {
     user = new UserDTO();
     user.id = 'tes-user';
     user.email = 'test@example.com';
+
+    /*eslint-disable */
+    profile = {
+      provider: 'provider',
+      id: '1',
+      _json: {
+        name: 'Test User',
+        given_name: 'User',
+        family_name: 'Test',
+        picture: 'picture',
+        email: 'test@example.com',
+        email_verified: true,
+      },
+    };
+    /* eslint-enable */
   });
 
   it('should be defined', () => {
@@ -58,5 +74,10 @@ describe('AuthService', () => {
   it('should return an access token and email on login', async () => {
     jest.spyOn(userService, 'login').mockResolvedValue(user);
     expect(await service.login(user)).toStrictEqual(expected);
+  });
+
+  it('should return an access token and email when passport calls this method', async () => {
+    jest.spyOn(userService, 'handleOauthData').mockResolvedValue(user);
+    expect(await service.handlePassportAuth(profile)).toStrictEqual(expected);
   });
 });

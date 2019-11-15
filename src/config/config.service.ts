@@ -4,9 +4,17 @@ import * as path from 'path';
 import * as Joi from '@hapi/joi';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { JwtModuleOptions } from '@nestjs/jwt';
+import { IOAuth2StrategyOptionWithRequest } from 'passport-google-oauth';
+import { ExtractJwt, StrategyOptions } from 'passport-jwt';
+
+import constants from './config.constants';
 
 export interface EnvConfig {
   [key: string]: string;
+}
+
+interface IScope {
+  scope: string | string[];
 }
 
 export default class ConfigService {
@@ -37,6 +45,9 @@ export default class ConfigService {
       JWT_EXPIRE_IN: Joi.string().default('1h'),
       JWT_ISSUER: Joi.string().default('Account-Service'),
       JWT_SUBJECT: Joi.string().default('Authorization'),
+      GOOGLE_CLIENT_ID: Joi.string().required(),
+      GOOGLE_CLIENT_SECRET: Joi.string().required(),
+      GOOGLE_CALLBACK_URL: Joi.string().required(),
     });
 
     const { error, value: validatedEnvConfig } = envVarsSchema.validate(
@@ -44,7 +55,7 @@ export default class ConfigService {
     );
 
     if (error) {
-      throw new Error(`Config validation error: ${error.message}`);
+      throw new Error(`${constants.getErrorMsg('ENV_01')} ${error.message}`);
     }
     return validatedEnvConfig;
   }
@@ -104,6 +115,24 @@ export default class ConfigService {
         issuer: this.get('JWT_ISSUER'),
         subject: this.get('JWT_SUBJECT'),
       },
+    };
+  }
+
+  getGoogleStrategyOptions(): IOAuth2StrategyOptionWithRequest & IScope {
+    return {
+      clientID: this.get('GOOGLE_CLIENT_ID'),
+      clientSecret: this.get('GOOGLE_CLIENT_SECRET'),
+      callbackURL: this.get('GOOGLE_CALLBACK_URL'),
+      passReqToCallback: true,
+      scope: ['profile', 'email'],
+    };
+  }
+
+  getJwtStrategyOptions(): StrategyOptions {
+    return {
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: this.get('APP_SECRET'),
     };
   }
 }
