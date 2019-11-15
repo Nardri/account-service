@@ -24,6 +24,7 @@ export default class UserEntity extends BaseEntity {
   @Column({
     type: 'varchar',
     length: 100,
+    nullable: true,
   })
   password: string;
 
@@ -32,4 +33,10 @@ export default class UserEntity extends BaseEntity {
     default: true,
   })
   isActive: boolean;
+
+  @Column({
+    type: 'boolean',
+    default: false,
+  })
+  verified: boolean;
 }

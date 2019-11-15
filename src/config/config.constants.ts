@@ -13,6 +13,7 @@ class ConfigConstants {
       USR_07: '"Email" must be a valid email.',
       SEV_01: 'Server error, Please contact the technical team.',
       AUTH_01: 'You are not authorized to view this endpoint.',
+      ENV_01: 'You are missing an env variables:',
     };
   }
 

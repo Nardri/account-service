@@ -10,6 +10,7 @@ import { NewUserDTO, UserDTO } from './user.dto';
 import UserRepository from './user.repository';
 import normalizeEmail from '../shared/normalizeEmail';
 import constants from '../config/config.constants';
+import { IOAuthProfile } from './user.interface';
 
 @Injectable()
 export default class UserService {
@@ -31,6 +32,10 @@ export default class UserService {
 
     if (!user) {
       throw new UnauthorizedException(constants.getErrorMsg('USR_05'));
+    }
+
+    if (!user.password) {
+      throw new BadRequestException(constants.getErrorMsg('USR_01'));
     }
 
     const match = await bcrypt.compare(userPayload.password, user.password);
@@ -59,12 +64,25 @@ export default class UserService {
     }
 
     const salt = await bcrypt.genSalt(10);
-
     const newUser: NewUserDTO = {
       ...userPayload,
       password: await bcrypt.hash(userPayload.password, salt),
     };
 
     return this.userRepository.save(newUser);
+  }
+
+  async handleOauthData(data: IOAuthProfile): Promise<UserDTO> {
+    const user = await this.userRepository.findByEmailOrUsername(data.email);
+    const newUser: NewUserDTO = {
+      email: data.email,
+      verified: data.verified,
+    };
+
+    if (!user) {
+      return this.userRepository.save(newUser);
+    }
+
+    return user;
   }
 }
