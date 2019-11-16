@@ -4,5 +4,8 @@ plugins:
     channel: eslint-5
 
 exclude_patterns:
-  - "**/*spec.ts",
-  - "**/*e2e-spec.ts",
+  - "**/*spec.ts"
+  - "**/*e2e-spec.ts"
+  - "**/*uniqueIdGenerator.ts"
+  - "*/**/scripts/*"
+  - "*/**/migrations/*"

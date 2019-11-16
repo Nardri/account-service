@@ -29,12 +29,15 @@ export default class ConfigService {
           case 'true' || 'True' || '1':
             data[key] = true;
             break;
+
           case 'false' || 'False' || '0':
             data[key] = false;
             break;
+
           case 'null' || '':
             data[key] = null;
             break;
+
           default:
             break;
         }
