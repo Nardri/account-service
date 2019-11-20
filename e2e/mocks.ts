@@ -9,7 +9,6 @@ import {
 import { Connection, Repository } from 'typeorm';
 
 import AppModule from '../src/app/app.module';
-import DatabaseModule from '../src/shared/database/database.module';
 import BaseSubscriber from '../src/shared/base/base.subscriber';
 import AllExceptionFilter from '../src/shared/filters/exception.filter';
 import AppService from '../src/app/app.service';
@@ -25,6 +24,7 @@ export const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(
   () => ({
     findByEmailOrUsername: jest.fn(entity => entity),
     countUserOccurrence: jest.fn(entity => entity),
+    findProfile: jest.fn(entity => entity),
     find: jest.fn(() => Array()),
     findOne: jest.fn(() => new UserEntity()),
     save: jest.fn(entity => entity),
@@ -34,7 +34,7 @@ export const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(
 
 export const createAndMigrateApp: () => Promise<INestApplication> = async () => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
-    imports: [AppModule, DatabaseModule],
+    imports: [AppModule],
     providers: [
       BaseSubscriber,
       {
@@ -52,7 +52,8 @@ export const createAndMigrateApp: () => Promise<INestApplication> = async () => 
 
   const connection = app.get(Connection);
   await connection.dropDatabase();
-  await connection.runMigrations();
+  await connection.synchronize(true);
+  // await connection.runMigrations();
 
   return app;
 };

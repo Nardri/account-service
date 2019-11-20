@@ -6,9 +6,12 @@ import UserController from './user.controller';
 import UserService from './user.service';
 import UserRepository from './user.repository';
 import UserEntity from './user.entity';
+import ProfileRepository from '../profile/profile.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, UserRepository])],
+  imports: [
+    TypeOrmModule.forFeature([UserEntity, UserRepository, ProfileRepository]),
+  ],
   controllers: [UserController],
   providers: [
     UserService,

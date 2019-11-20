@@ -11,17 +11,18 @@ import UserRepository from './user.repository';
 import normalizeEmail from '../shared/normalizeEmail';
 import constants from '../config/config.constants';
 import { IOAuthProfile } from './user.interface';
+import ProfileRepository from '../profile/profile.repository';
+import ProfileEntity from '../profile/profile.entity';
 
 @Injectable()
 export default class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly profileRepository: ProfileRepository,
+  ) {}
 
   async findAll(): Promise<UserDTO[]> {
     return this.userRepository.find();
-  }
-
-  async findOne(id: string): Promise<UserDTO> {
-    return this.userRepository.findOne({ id });
   }
 
   async login(userPayload: NewUserDTO): Promise<UserDTO> {
@@ -56,7 +57,6 @@ export default class UserService {
 
     const userFound = await this.userRepository.countUserOccurrence(
       normalizedEmail,
-      userPayload.username ? userPayload.username : null,
     );
 
     if (userFound) {
@@ -69,6 +69,8 @@ export default class UserService {
       password: await bcrypt.hash(userPayload.password, salt),
     };
 
+    const newProfile = new ProfileEntity();
+    newUser.profile = await this.profileRepository.save(newProfile);
     return this.userRepository.save(newUser);
   }
 
@@ -80,6 +82,12 @@ export default class UserService {
     };
 
     if (!user) {
+      const newProfile = new ProfileEntity();
+      newProfile.firstName = data.firstName;
+      newProfile.lastName = data.lastName;
+      newProfile.photoUrl = data.picture;
+      newProfile.username = data.name;
+      newUser.profile = await this.profileRepository.save(newProfile);
       return this.userRepository.save(newUser);
     }
 

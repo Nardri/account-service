@@ -1,18 +1,13 @@
-import { Entity, Column } from 'typeorm';
+import {
+  Entity, Column, OneToOne, JoinColumn, 
+} from 'typeorm';
 import { Exclude } from 'class-transformer';
 
 import BaseEntity from '../shared/base/base.entity';
+import ProfileEntity from '../profile/profile.entity';
 
-@Entity({ name: 'users' })
+@Entity({ name: 'user' })
 export default class UserEntity extends BaseEntity {
-  @Column({
-    type: 'varchar',
-    length: 50,
-    unique: true,
-    nullable: true,
-  })
-  username: string;
-
   @Column({
     type: 'varchar',
     length: 100,
@@ -39,4 +34,15 @@ export default class UserEntity extends BaseEntity {
     default: false,
   })
   verified: boolean;
+
+  @OneToOne(
+    () => ProfileEntity,
+    profile => profile.user,
+    {
+      onDelete: 'CASCADE',
+      cascade: true,
+    },
+  )
+  @JoinColumn()
+  profile: ProfileEntity;
 }

@@ -8,6 +8,7 @@ import UserEntity from '../user.entity';
 import UserRepository from '../user.repository';
 import { UserDTO } from '../user.dto';
 import { MockType, repositoryMockFactory } from '../../../e2e/mocks';
+import ProfileRepository from '../../profile/profile.repository';
 
 describe('User Controller without DB Access.', () => {
   let controller: UserController;
@@ -21,6 +22,10 @@ describe('User Controller without DB Access.', () => {
         UserService,
         {
           provide: getRepositoryToken(UserRepository),
+          useFactory: repositoryMockFactory,
+        },
+        {
+          provide: getRepositoryToken(ProfileRepository),
           useFactory: repositoryMockFactory,
         },
       ],
@@ -39,7 +44,6 @@ describe('User Controller without DB Access.', () => {
 
   it('should return an array of users', async () => {
     const expected = new UserDTO();
-    expected.username = 'tes-user';
     expected.email = 'test@example.com';
 
     const result = new Promise<UserDTO[]>(resolve => resolve([expected]));

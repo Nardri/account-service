@@ -5,7 +5,7 @@ class ConfigConstants {
     this.errorCodes = {
       USR_01: 'Email or Password provided is incorrect.',
       USR_02: '"Email" is required and must be a valid email.',
-      USR_03: '"Email/Username" already exists.',
+      USR_03: '"Email" already exists.',
       USR_04:
         '"Password" is required and must be at least 8 characters long and alphanumeric.',
       USR_05: 'Oops!, this "Email" is not registered yet.',

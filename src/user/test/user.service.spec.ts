@@ -9,6 +9,7 @@ import { NewUserDTO } from '../user.dto';
 import { repositoryMockFactory } from '../../../e2e/mocks';
 import constants from '../../config/config.constants';
 import { IOAuthProfile } from '../user.interface';
+import ProfileRepository from '../../profile/profile.repository';
 
 describe('UserService', () => {
   let service: UserService;
@@ -27,6 +28,10 @@ describe('UserService', () => {
           provide: getRepositoryToken(UserRepository),
           useFactory: repositoryMockFactory,
         },
+        {
+          provide: getRepositoryToken(ProfileRepository),
+          useFactory: repositoryMockFactory,
+        },
       ],
     }).compile();
 
@@ -39,7 +44,6 @@ describe('UserService', () => {
 
     userSignUpPayload = new NewUserDTO();
     userSignUpPayload.email = 'example@test.com';
-    userSignUpPayload.username = 'exampleUser';
     userSignUpPayload.password = 'example';
 
     userEntity = new UserEntity();
@@ -62,10 +66,6 @@ describe('UserService', () => {
     expect(await service.findAll()).toStrictEqual([]);
   });
 
-  it('should return a user', async () => {
-    expect(await service.findOne('-lidjndijw')).toStrictEqual(new UserEntity());
-  });
-
   it('should create a user', async done => {
     jest.spyOn(userRepo, 'countUserOccurrence').mockResolvedValue(0);
 
@@ -73,9 +73,8 @@ describe('UserService', () => {
       expect(res).toBeInstanceOf(Object);
       expect(res).toHaveProperty('email');
       expect(res).toHaveProperty('password');
-      expect(res).toHaveProperty('username');
+      expect(res).toHaveProperty('profile');
       expect(res.email).toBe(userSignUpPayload.email);
-      expect(res.username).toBe(userSignUpPayload.username);
       done();
     });
   });

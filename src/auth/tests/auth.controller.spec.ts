@@ -9,6 +9,7 @@ import UserService from '../../user/user.service';
 import { jwtServiceMock, repositoryMockFactory } from '../../../e2e/mocks';
 import { UserDTO } from '../../user/user.dto';
 import constants from '../../config/config.constants';
+import ProfileRepository from '../../profile/profile.repository';
 
 describe('Auth Controller', () => {
   let controller: AuthController;
@@ -28,6 +29,10 @@ describe('Auth Controller', () => {
         },
         {
           provide: getRepositoryToken(UserRepository),
+          useFactory: repositoryMockFactory,
+        },
+        {
+          provide: getRepositoryToken(ProfileRepository),
           useFactory: repositoryMockFactory,
         },
       ],
