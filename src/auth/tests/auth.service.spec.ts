@@ -8,6 +8,7 @@ import UserRepository from '../../user/user.repository';
 import UserService from '../../user/user.service';
 import { jwtServiceMock, repositoryMockFactory } from '../../../e2e/mocks';
 import { UserDTO } from '../../user/user.dto';
+import ProfileRepository from '../../profile/profile.repository';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -27,6 +28,10 @@ describe('AuthService', () => {
         },
         {
           provide: getRepositoryToken(UserRepository),
+          useFactory: repositoryMockFactory,
+        },
+        {
+          provide: getRepositoryToken(ProfileRepository),
           useFactory: repositoryMockFactory,
         },
       ],
