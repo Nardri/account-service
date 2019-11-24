@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 
 import ConfigService from '../config/config.service';
+import AuthService from './auth.service';
 
 interface IJWTToken {
   id: string;
@@ -15,11 +16,15 @@ interface IJWTToken {
 
 @Injectable()
 export default class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly authService: AuthService,
+  ) {
     super(configService.getJwtStrategyOptions());
   }
 
   async validate(payload: IJWTToken): Promise<IJWTToken> {
-    return { id: payload.id, email: payload.email };
+    const userData = await this.authService.validateUser(payload.id);
+    return { id: userData.id, email: userData.email };
   }
 }

@@ -1,0 +1,8 @@
+- services:
+      id: "-LuTI7-WVueqA_MKOIU7"
+      name: "USER_SERVICE"
+
+- services:
+      id: "-LuU7ns_LWBQoTksjIw2"
+      name: "EMAIL_SERVICE"
+      isActive: false

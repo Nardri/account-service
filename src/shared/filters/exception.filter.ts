@@ -7,9 +7,9 @@ import {
 } from '@nestjs/common';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Request, Response } from 'express';
+import { EntityNotFoundError } from 'typeorm/error/EntityNotFoundError';
 
 import ConfigService from '../../config/config.service';
-import constants from '../../config/config.constants';
 
 @Catch()
 export default class AllExceptionFilter implements ExceptionFilter {
@@ -19,19 +19,26 @@ export default class AllExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+    const notFound = exception instanceof EntityNotFoundError ? HttpStatus.NOT_FOUND : null;
     const status = exception instanceof HttpException
       ? exception.getStatus()
-      : HttpStatus.INTERNAL_SERVER_ERROR;
+      : notFound || HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const exceptionResponse = exception instanceof HttpException
-      ? exception.getResponse()
-      : {
+    const getHTTPExceptions = exception instanceof HttpException ? exception.getResponse() : null;
+    const getServerError = exception instanceof Error
+      ? {
         code: 'Internal',
         message:
               exception instanceof Error && !this.configService.isProduction()
                 ? exception.stack
-                : constants.getErrorMsg('SEV_01'),
-      };
+                : this.configService.getErrorMsg('SEV_01'),
+      }
+      : null;
+    const getNotFound = exception instanceof EntityNotFoundError
+      ? { message: this.configService.getErrorMsg('USR_12') }
+      : null;
+
+    const exceptionResponse = getHTTPExceptions || getNotFound || getServerError;
 
     const responseBody = {
       statusCode: status,
@@ -44,8 +51,8 @@ export default class AllExceptionFilter implements ExceptionFilter {
   }
 
   statusMessage(status: number, exceptionResponse: any): string {
-    if (status === 401) {
-      return constants.getErrorMsg('AUTH_01');
+    if (status === 403) {
+      return this.configService.getErrorMsg('AUTH_02');
     }
     return exceptionResponse;
   }

@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 
 import ProfileService from '../profile.service';
 import ProfileRepository from '../profile.repository';
-import { repositoryMockFactory } from '../../../e2e/mocks';
+import { repositoryMockFactory } from '../../../e2e/mocksAndUtils';
 import ProfileEntity from '../profile.entity';
 
 describe('ProfileService', () => {
@@ -39,9 +39,10 @@ describe('ProfileService', () => {
 
     await service.getProfile('test-id').then(res => {
       expect(res).toBeInstanceOf(Object);
-      expect(res).toHaveProperty('firstName');
-      expect(res).toHaveProperty('lastName');
-      expect(res.firstName).toBe(profileEntity.firstName);
+      expect(res).toHaveProperty('data');
+      expect(res.data).toHaveProperty('firstName');
+      expect(res.data).toHaveProperty('lastName');
+      expect(res.data.firstName).toBe(profileEntity.firstName);
       done();
     });
   });

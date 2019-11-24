@@ -8,6 +8,8 @@ import UserModule from '../user/user.module';
 import JwtStrategy from './jwt.strategy';
 import ConfigService from '../config/config.service';
 import GoogleStrategy from './google.strategy';
+import AccessControlModule from '../access-control/access-control.module';
+import AuthSchemas from './auth.validation';
 
 @Module({
   imports: [
@@ -20,9 +22,10 @@ import GoogleStrategy from './google.strategy';
       inject: [ConfigService],
     }),
     UserModule,
+    AccessControlModule,
   ],
-  providers: [AuthService, JwtStrategy, GoogleStrategy],
-  exports: [UserModule],
+  providers: [AuthService, AuthSchemas, JwtStrategy, GoogleStrategy],
+  exports: [UserModule, AccessControlModule],
   controllers: [AuthController],
 })
 export default class AuthModule {}

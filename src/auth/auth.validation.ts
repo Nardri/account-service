@@ -1,44 +1,46 @@
+import { Injectable } from '@nestjs/common';
 import * as Joi from '@hapi/joi';
 
-import constants from '../config/config.constants';
+import ConfigService from '../config/config.service';
 
+@Injectable()
 export default class AuthSchemas {
-  static passwordRegx = /^(?=.*\d)(?=.*[A-Za-z])[A-Za-z0-9]*$/;
+  private passwordRegx = /^(?=.*\d)(?=.*[A-Za-z])[A-Za-z0-9]*$/;
 
-  static signUp: Joi.ObjectSchema = Joi.object({
+  private email = Joi.string()
+    .email()
+    .trim()
+    .required()
+    .label('Email')
+    .normalize()
+    .rule({
+      message: this.configService.getErrorMsg('USR_02'),
+    });
+
+  private password = Joi.string()
+    .regex(this.passwordRegx)
+    .rule({
+      message: this.configService.getErrorMsg('USR_04'),
+    })
+    .required()
+    .min(8)
+    .max(16)
+    .label('Password');
+
+  signUp: Joi.ObjectSchema = Joi.object({
     username: Joi.string()
+      .trim()
       .max(16)
       .min(3),
-    email: Joi.string()
-      .email()
-      .required()
-      .label('Email')
-      .normalize()
-      .error(new Error(constants.getErrorMsg('USR_02'))),
 
-    password: Joi.string()
-      .regex(AuthSchemas.passwordRegx)
-      .required()
-      .min(8)
-      .max(16)
-      .label('Password')
-      .error(new Error(constants.getErrorMsg('USR_04'))),
+    email: this.email,
+    password: this.password,
   });
 
-  static login: Joi.ObjectSchema = Joi.object({
-    email: Joi.string()
-      .email()
-      .required()
-      .label('Email')
-      .normalize()
-      .error(new Error(constants.getErrorMsg('USR_02'))),
-
-    password: Joi.string()
-      .required()
-      .regex(AuthSchemas.passwordRegx)
-      .min(8)
-      .max(16)
-      .label('Password')
-      .error(new Error(constants.getErrorMsg('USR_04'))),
+  login: Joi.ObjectSchema = Joi.object({
+    email: this.email,
+    password: this.password,
   });
+
+  constructor(private readonly configService: ConfigService) {}
 }

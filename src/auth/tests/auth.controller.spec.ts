@@ -6,14 +6,20 @@ import AuthController from '../auth.controller';
 import AuthService from '../auth.service';
 import UserRepository from '../../user/user.repository';
 import UserService from '../../user/user.service';
-import { jwtServiceMock, repositoryMockFactory } from '../../../e2e/mocks';
+import {
+  configServiceMsgMock,
+  jwtServiceMock,
+  repositoryMockFactory,
+} from '../../../e2e/mocksAndUtils';
 import { UserDTO } from '../../user/user.dto';
-import constants from '../../config/config.constants';
 import ProfileRepository from '../../profile/profile.repository';
+import AuthSchemas from '../auth.validation';
+import ConfigService from '../../config/config.service';
 
 describe('Auth Controller', () => {
   let controller: AuthController;
   let authService: AuthService;
+  let configService: ConfigService;
   let expected: any;
   let userLoginPayload: UserDTO;
 
@@ -23,6 +29,11 @@ describe('Auth Controller', () => {
       providers: [
         AuthService,
         UserService,
+        AuthSchemas,
+        {
+          provide: ConfigService,
+          useValue: configServiceMsgMock,
+        },
         {
           provide: JwtService,
           useValue: jwtServiceMock,
@@ -40,6 +51,7 @@ describe('Auth Controller', () => {
 
     controller = module.get<AuthController>(AuthController);
     authService = module.get<AuthService>(AuthService);
+    configService = module.get<ConfigService>(ConfigService);
 
     userLoginPayload = new UserDTO();
     userLoginPayload.email = 'example@test.com';
@@ -66,7 +78,7 @@ describe('Auth Controller', () => {
   });
 
   it('should throw an error on sign up with incorrect details', async done => {
-    userLoginPayload.password = '';
+    userLoginPayload.password = 'kkl';
     jest.spyOn(authService, 'signUp').mockResolvedValue(expected);
     await controller
       .signUp(userLoginPayload)
@@ -74,7 +86,7 @@ describe('Auth Controller', () => {
       .catch(err => {
         expect(err.status).toStrictEqual(400);
         expect(err.message['message']).toStrictEqual(
-          constants.getErrorMsg('USR_04'),
+          configService.getErrorMsg('USR_04'),
         );
         done();
       });
@@ -89,7 +101,7 @@ describe('Auth Controller', () => {
   });
 
   it('should throw an error on login with incorrect details', async done => {
-    userLoginPayload.password = '';
+    userLoginPayload.password = 'ool';
     jest.spyOn(authService, 'login').mockResolvedValue(expected);
     await controller
       .login(userLoginPayload)
@@ -97,7 +109,7 @@ describe('Auth Controller', () => {
       .catch(err => {
         expect(err.status).toStrictEqual(400);
         expect(err.message['message']).toStrictEqual(
-          constants.getErrorMsg('USR_04'),
+          configService.getErrorMsg('USR_04'),
         );
         done();
       });

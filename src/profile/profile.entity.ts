@@ -9,7 +9,7 @@ export enum Gender {
   Female = 2,
 }
 
-@Entity({ name: 'profile' })
+@Entity({ name: 'profiles' })
 export default class ProfileEntity extends BaseEntity {
   @Column({
     type: 'varchar',
