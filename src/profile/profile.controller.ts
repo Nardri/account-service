@@ -7,7 +7,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 
 import ProfileService from './profile.service';
-import { ProfileDTO } from './profile.dto';
+import { ProfileResponse } from './profile.dto';
 
 @Controller('profile')
 export default class ProfileController {
@@ -24,7 +24,7 @@ export default class ProfileController {
   })
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  async profile(@Req() req: Request): Promise<ProfileDTO> {
+  async profile(@Req() req: Request): Promise<ProfileResponse> {
     return this.profileService.getProfile(req.user['id']);
   }
 }

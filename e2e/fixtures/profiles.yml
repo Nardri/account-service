@@ -1,0 +1,17 @@
+- profiles:
+    id: "-LuTI7-WVueqA_mEwKI8"
+    username: "testUser first"
+    firstName: 'testUser'
+    lastName: 'first'
+    photoUrl: 'https://placehold.it'
+    phone: '123456'
+    gender: 1
+
+- profiles:
+    id: "-LuU7ns_LWBQoT83RKi2"
+    username: "testUser second"
+    firstName: 'testUser'
+    lastName: 'second'
+    photoUrl: 'https://placehold.it'
+    phone: '123456'
+    gender: 2

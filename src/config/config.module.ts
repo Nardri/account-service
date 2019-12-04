@@ -1,13 +1,14 @@
 import { Module, Global } from '@nestjs/common';
 
 import ConfigService from './config.service';
+import { errorCodesObject, messageCodeObject } from './config.constants';
 
 @Global()
 @Module({
   providers: [
     {
       provide: ConfigService,
-      useValue: new ConfigService('.env'),
+      useValue: new ConfigService('.env', errorCodesObject, messageCodeObject),
     },
   ],
   exports: [ConfigService],

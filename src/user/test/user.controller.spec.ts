@@ -6,9 +6,13 @@ import UserController from '../user.controller';
 import UserService from '../user.service';
 import UserEntity from '../user.entity';
 import UserRepository from '../user.repository';
-import { UserDTO } from '../user.dto';
-import { MockType, repositoryMockFactory } from '../../../e2e/mocks';
+import {
+  configServiceMsgMock,
+  MockType,
+  repositoryMockFactory,
+} from '../../../e2e/mocksAndUtils';
 import ProfileRepository from '../../profile/profile.repository';
+import ConfigService from '../../config/config.service';
 
 describe('User Controller without DB Access.', () => {
   let controller: UserController;
@@ -20,6 +24,10 @@ describe('User Controller without DB Access.', () => {
       controllers: [UserController],
       providers: [
         UserService,
+        {
+          provide: ConfigService,
+          useValue: configServiceMsgMock,
+        },
         {
           provide: getRepositoryToken(UserRepository),
           useFactory: repositoryMockFactory,
@@ -43,10 +51,10 @@ describe('User Controller without DB Access.', () => {
   });
 
   it('should return an array of users', async () => {
-    const expected = new UserDTO();
+    const expected = new UserEntity();
     expected.email = 'test@example.com';
 
-    const result = new Promise<UserDTO[]>(resolve => resolve([expected]));
+    const result = new Promise<UserEntity[]>(resolve => resolve([expected]));
     jest.spyOn(userService, 'findAll').mockImplementation(() => result);
     expect(await controller.findAll()).toStrictEqual(Array(expected));
   });

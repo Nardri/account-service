@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Post,
@@ -7,6 +6,7 @@ import {
   Req,
   Res,
   UseGuards,
+  HttpCode,
 } from '@nestjs/common';
 import { ApiUseTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
@@ -17,35 +17,26 @@ import { UserDTO } from '../user/user.dto';
 import AuthSchemas from './auth.validation';
 import AuthService from './auth.service';
 import { AuthResponse } from './auth.dto';
+import { validateWithJoi } from '../shared/util';
 
 @ApiUseTags('Authorization')
 @Controller('auth')
 export default class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly authSchemas: AuthSchemas,
+  ) {}
 
   @Post('signup')
   async signUp(@Body() payload: UserDTO): Promise<AuthResponse> {
-    const { error, value: validatedPayload } = AuthSchemas.signUp.validate(
-      payload,
-    );
-
-    if (error) {
-      throw new BadRequestException(error.message);
-    }
-
+    const validatedPayload = validateWithJoi(payload, this.authSchemas.signUp);
     return this.authService.signUp(validatedPayload);
   }
 
   @Post('login')
+  @HttpCode(200)
   async login(@Body() payload: UserDTO): Promise<AuthResponse> {
-    const { error, value: validatedPayload } = AuthSchemas.login.validate(
-      payload,
-    );
-
-    if (error) {
-      throw new BadRequestException(error.message);
-    }
-
+    const validatedPayload = validateWithJoi(payload, this.authSchemas.login);
     return this.authService.login(validatedPayload);
   }
 

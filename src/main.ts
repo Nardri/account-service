@@ -1,10 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as morgan from 'morgan';
 
 import AppModule from './app/app.module';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
+  const loggerFormat = ':remote-addr - :remote-user [:date[web]] ":method '
+    + ':url HTTP/:http-version" :status :res[content-length] '
+    + '":referrer" ":user-agent';
+  app.use(morgan(loggerFormat));
 
   const options = new DocumentBuilder()
     .addBearerAuth()

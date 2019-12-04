@@ -6,15 +6,21 @@ import AuthController from '../auth.controller';
 import AuthService from '../auth.service';
 import UserRepository from '../../user/user.repository';
 import UserService from '../../user/user.service';
-import { jwtServiceMock, repositoryMockFactory } from '../../../e2e/mocks';
-import { UserDTO } from '../../user/user.dto';
+import {
+  configServiceMsgMock,
+  jwtServiceMock,
+  repositoryMockFactory,
+} from '../../../e2e/mocksAndUtils';
 import ProfileRepository from '../../profile/profile.repository';
+import UserEntity from '../../user/user.entity';
+import AuthSchemas from '../auth.validation';
+import ConfigService from '../../config/config.service';
 
 describe('AuthService', () => {
   let service: AuthService;
   let userService: UserService;
   let expected: any;
-  let user: UserDTO;
+  let user: UserEntity;
   let profile: any;
 
   beforeEach(async () => {
@@ -22,6 +28,11 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         UserService,
+        AuthSchemas,
+        {
+          provide: ConfigService,
+          useValue: configServiceMsgMock,
+        },
         {
           provide: JwtService,
           useValue: jwtServiceMock,
@@ -47,7 +58,7 @@ describe('AuthService', () => {
       },
     };
 
-    user = new UserDTO();
+    user = new UserEntity();
     user.id = 'tes-user';
     user.email = 'test@example.com';
 

@@ -1,7 +1,9 @@
 plugins:
   eslint:
     enabled: true
-    channel: eslint-5
+    channel: eslint-6
+    config:
+      config: ./.eslintrc.json
 
 exclude_patterns:
   - "**/*spec.ts"

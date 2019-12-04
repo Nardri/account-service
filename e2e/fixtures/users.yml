@@ -1,0 +1,18 @@
+- users:
+    id: "-Lud9VIgVMCA2CdnATSN"
+    email: "test-first@example.com"
+    verified: true
+    password: "$2b$10$D.vXHt/10ptZcGUcFDAOOuyOBIsnYVJGnHIY.ZUeeO0Ve32f/L0ky" # Password12
+    profile:
+      id: "-LuTI7-WVueqA_mEwKI8"
+
+- users:
+    id: "-Lud9VInY9u92YSou6Rd"
+    email: "test-second@example.com"
+    password: "$2b$10$D.vXHt/10ptZcGUcFDAOOuyOBIsnYVJGnHIY.ZUeeO0Ve32f/L0ky" # Password12
+    profile:
+      id: "-LuU7ns_LWBQoT83RKi2"
+
+- users:
+    id: "-Lud9VInY9u92YSokAq8"
+    email: "test-third@example.com"

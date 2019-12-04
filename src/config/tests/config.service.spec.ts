@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import ConfigService from './config.service';
+import ConfigService from '../config.service';
+import { errorCodesObject, messageCodeObject } from '../config.constants';
 
 describe('ConfigService', () => {
   let service: ConfigService;
@@ -10,7 +11,11 @@ describe('ConfigService', () => {
       providers: [
         {
           provide: ConfigService,
-          useValue: new ConfigService('.env'),
+          useValue: new ConfigService(
+            '.env',
+            errorCodesObject,
+            messageCodeObject,
+          ),
         },
       ],
     }).compile();

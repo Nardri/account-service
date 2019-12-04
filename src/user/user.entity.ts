@@ -1,12 +1,13 @@
 import {
-  Entity, Column, OneToOne, JoinColumn, 
+  Entity, Column, OneToOne, JoinColumn, ManyToOne, 
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 
 import BaseEntity from '../shared/base/base.entity';
 import ProfileEntity from '../profile/profile.entity';
+import RoleEntity from '../access-control/roles.entity';
 
-@Entity({ name: 'user' })
+@Entity({ name: 'users' })
 export default class UserEntity extends BaseEntity {
   @Column({
     type: 'varchar',
@@ -45,4 +46,11 @@ export default class UserEntity extends BaseEntity {
   )
   @JoinColumn()
   profile: ProfileEntity;
+
+  @ManyToOne(
+    () => RoleEntity,
+    role => role.users,
+  )
+  @JoinColumn()
+  role: RoleEntity;
 }

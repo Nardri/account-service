@@ -2,6 +2,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import ConfigService from '../config/config.service';
+import {
+  errorCodesObject,
+  messageCodeObject,
+} from '../config/config.constants';
 
 class WriteOrmConfig {
   constructor(private readonly config: ConfigService) {}
@@ -48,4 +52,6 @@ class WriteOrmConfig {
   /* eslint-enable */
 }
 
-new WriteOrmConfig(new ConfigService('.env')).write();
+new WriteOrmConfig(
+  new ConfigService('.env', errorCodesObject, messageCodeObject),
+).write();

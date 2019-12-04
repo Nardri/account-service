@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { NewUserDTO, UserDTO } from '../user/user.dto';
+import { NewUserDTO } from '../user/user.dto';
 import UserService from '../user/user.service';
 import { AuthResponse } from './auth.dto';
+import UserEntity from '../user/user.entity';
 
 @Injectable()
 export default class AuthService {
@@ -12,7 +13,7 @@ export default class AuthService {
     private readonly userService: UserService,
   ) {}
 
-  private authResponse(user: UserDTO): AuthResponse {
+  private authResponse(user: UserEntity): AuthResponse {
     const payload = {
       id: user.id,
       email: user.email,
@@ -34,6 +35,10 @@ export default class AuthService {
   async login(userPayload: NewUserDTO): Promise<AuthResponse> {
     const user = await this.userService.login(userPayload);
     return this.authResponse(user);
+  }
+
+  async validateUser(id: string): Promise<UserEntity> {
+    return this.userService.findUser(id);
   }
 
   async handlePassportAuth(profile: any): Promise<AuthResponse> {

@@ -6,18 +6,20 @@ import { JwtModuleOptions } from '@nestjs/jwt';
 import { IOAuth2StrategyOptionWithRequest } from 'passport-google-oauth';
 import { ExtractJwt, StrategyOptions } from 'passport-jwt';
 
-export interface EnvConfig {
-  [key: string]: string;
-}
+import { TObject } from '../shared/base/base.type';
 
 interface IScope {
   scope: string | string[];
 }
 
 export default class ConfigService {
-  private readonly envConfig: EnvConfig;
+  private readonly envConfig: TObject;
 
-  constructor(filePath: string) {
+  constructor(
+    filePath: string,
+    private readonly errorCodes: TObject,
+    private readonly messageCodes: TObject,
+  ) {
     const config = dotenv.parse(fs.readFileSync(filePath));
     this.envConfig = ConfigService.evalDotEnv(config);
   }
@@ -117,5 +119,13 @@ export default class ConfigService {
       ignoreExpiration: false,
       secretOrKey: this.get('APP_SECRET'),
     };
+  }
+
+  getErrorMsg(key: string): string {
+    return this.errorCodes[key] ? this.errorCodes[key] : 'Invalid';
+  }
+
+  getMsg(key: string): string {
+    return this.messageCodes[key] ? this.messageCodes[key] : 'Invalid';
   }
 }
