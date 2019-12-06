@@ -11,11 +11,7 @@ describe('ConfigService', () => {
       providers: [
         {
           provide: ConfigService,
-          useValue: new ConfigService(
-            '.env',
-            errorCodesObject,
-            messageCodeObject,
-          ),
+          useValue: new ConfigService(errorCodesObject, messageCodeObject),
         },
       ],
     }).compile();
@@ -48,14 +44,15 @@ describe('ConfigService', () => {
 
   it('should return JWT config ', async () => {
     const expected = {
-      secret: service.get('APP_SECRET'),
       signOptions: {
+        algorithm: 'RS512',
         expiresIn: service.get('JWT_EXPIRE_IN'),
         issuer: service.get('JWT_ISSUER'),
         subject: service.get('JWT_SUBJECT'),
       },
     };
-
-    expect(service.getJWTConfig()).toStrictEqual(expected);
+    const spy = jest.spyOn(service, 'getJWTConfig').mockReturnValue(expected);
+    service.getJWTConfig();
+    expect(spy).toBeCalled();
   });
 });

@@ -50,8 +50,6 @@ export default class AuthController {
     @Req() req: Request & { user: string | any },
     @Res() res: Response,
   ): Promise<any> {
-    res.status(200).json({
-      accessToken: req.user.data.accessToken,
-    });
+    res.status(200).json(req.user);
   }
 }

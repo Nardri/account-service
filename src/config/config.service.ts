@@ -5,6 +5,7 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { JwtModuleOptions } from '@nestjs/jwt';
 import { IOAuth2StrategyOptionWithRequest } from 'passport-google-oauth';
 import { ExtractJwt, StrategyOptions } from 'passport-jwt';
+import { InternalServerErrorException } from '@nestjs/common';
 
 import { TObject } from '../shared/base/base.type';
 
@@ -15,41 +16,24 @@ interface IScope {
 export default class ConfigService {
   private readonly envConfig: TObject;
 
+  private readonly privateKEY: any;
+
+  private readonly publicKEY: any;
+
   constructor(
-    filePath: string,
     private readonly errorCodes: TObject,
     private readonly messageCodes: TObject,
   ) {
-    const config = dotenv.parse(fs.readFileSync(filePath));
-    this.envConfig = ConfigService.evalDotEnv(config);
-  }
+    dotenv.config();
+    this.envConfig = process.env;
 
-  private static evalDotEnv(data: any): any {
-    for (const key in data) {
-      if (Object.prototype.hasOwnProperty.call(data, key)) {
-        switch (data[key]) {
-          case 'true' || 'True' || '1':
-            data[key] = true;
-            break;
-
-          case 'false' || 'False' || '0':
-            data[key] = false;
-            break;
-
-          case 'null' || '':
-            data[key] = null;
-            break;
-
-          default:
-            break;
-        }
-        // eslint-disable-next-line no-restricted-globals
-        if (!isNaN(Number(key))) {
-          data[key] = Number(key);
-        }
-      }
+    // PRIVATE and PUBLIC key
+    try {
+      this.privateKEY = fs.readFileSync('./privateKey.pem', 'utf8');
+      this.publicKEY = fs.readFileSync('./publicKey.pem', 'utf8');
+    } catch (e) {
+      throw new InternalServerErrorException(e);
     }
-    return data;
   }
 
   get(key: string): any {
@@ -94,11 +78,12 @@ export default class ConfigService {
 
   getJWTConfig(): JwtModuleOptions {
     return {
-      secret: this.get('APP_SECRET'),
+      secret: this.privateKEY,
       signOptions: {
         expiresIn: this.get('JWT_EXPIRE_IN'),
         issuer: this.get('JWT_ISSUER'),
         subject: this.get('JWT_SUBJECT'),
+        algorithm: 'RS512',
       },
     };
   }
@@ -117,7 +102,8 @@ export default class ConfigService {
     return {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: this.get('APP_SECRET'),
+      secretOrKey: this.publicKEY,
+      algorithms: ['RS512'],
     };
   }
 

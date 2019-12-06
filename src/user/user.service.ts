@@ -3,16 +3,17 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
-import { NewUserDTO } from './user.dto';
-import UserRepository from './user.repository';
-import normalizeEmail from '../shared/normalizeEmail';
-import { IOAuthProfile } from './user.interface';
-import ProfileRepository from '../profile/profile.repository';
-import ProfileEntity from '../profile/profile.entity';
-import UserEntity from './user.entity';
 import ConfigService from '../config/config.service';
+import ProfileEntity from '../profile/profile.entity';
+import ProfileRepository from '../profile/profile.repository';
+import { TUserEntity } from '../shared/base/base.type';
+import normalizeEmail from '../shared/normalizeEmail';
+import { NewUserDTO, UserResponse } from './user.dto';
+import UserEntity from './user.entity';
+import { IOAuthProfile } from './user.interface';
+import UserRepository from './user.repository';
 
 @Injectable()
 export default class UserService {
@@ -21,6 +22,12 @@ export default class UserService {
     private readonly profileRepository: ProfileRepository,
     private readonly configService: ConfigService,
   ) {}
+
+  private static userResponse(data: TUserEntity | string): UserResponse {
+    return {
+      data,
+    } as UserResponse;
+  }
 
   async findAll(): Promise<UserEntity[]> {
     return this.userRepository.find();
@@ -39,7 +46,6 @@ export default class UserService {
   async login(userPayload: NewUserDTO): Promise<UserEntity> {
     const normalizedEmail = normalizeEmail(userPayload.email);
     const user = await this.userRepository.findByEmail(normalizedEmail);
-
     if (!user) {
       throw new UnauthorizedException(this.configService.getErrorMsg('USR_05'));
     }
@@ -80,7 +86,8 @@ export default class UserService {
 
     const newProfile = new ProfileEntity();
     newUser.profile = await this.profileRepository.save(newProfile);
-    return this.userRepository.save(newUser);
+    const savedUser = await this.userRepository.save(newUser);
+    return this.userRepository.findByEmail(savedUser.email);
   }
 
   async handleOauthData(data: IOAuthProfile): Promise<UserEntity> {

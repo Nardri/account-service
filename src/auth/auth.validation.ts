@@ -5,9 +5,9 @@ import ConfigService from '../config/config.service';
 
 @Injectable()
 export default class AuthSchemas {
-  private passwordRegx = /^(?=.*\d)(?=.*[A-Za-z])[A-Za-z0-9]*$/;
+  protected passwordRegx = /^(?=.*\d)(?=.*[A-Za-z])[A-Za-z0-9]*$/;
 
-  private email = Joi.string()
+  protected email = Joi.string()
     .email()
     .trim()
     .required()
@@ -17,7 +17,7 @@ export default class AuthSchemas {
       message: this.configService.getErrorMsg('USR_02'),
     });
 
-  private password = Joi.string()
+  protected password = Joi.string()
     .regex(this.passwordRegx)
     .rule({
       message: this.configService.getErrorMsg('USR_04'),
@@ -42,5 +42,5 @@ export default class AuthSchemas {
     password: this.password,
   });
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(protected readonly configService: ConfigService) {}
 }
