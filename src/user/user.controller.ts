@@ -8,7 +8,9 @@ import { UserDTO } from './user.dto';
 @ApiUseTags('Accounts')
 @Controller('account')
 export default class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService, // private readonly userSchema: UserSchemas,
+  ) {}
 
   @ApiBearerAuth()
   @ApiResponse({
@@ -20,7 +22,7 @@ export default class UserController {
     description: 'Unauthorized.',
   })
   @UseGuards(AuthGuard('jwt'))
-  @Get()
+  @Get('users')
   async findAll(): Promise<UserDTO[]> {
     return this.userService.findAll();
   }

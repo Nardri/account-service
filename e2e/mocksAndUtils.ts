@@ -23,10 +23,12 @@ export type MockType<T> = {
 export const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(
   () => ({
     findByEmail: jest.fn(entity => entity),
+    findByEmailWithPermissions: jest.fn(entity => entity),
     countUserOccurrence: jest.fn(entity => entity),
     findProfile: jest.fn(entity => entity),
     find: jest.fn(() => Array()),
     findOneOrFail: jest.fn(entity => entity),
+    findOne: jest.fn(entity => entity),
     save: jest.fn(entity => entity),
     update: jest.fn(entity => entity),
     getRoles: jest.fn(entity => entity),
@@ -100,26 +102,6 @@ export const loginTestUser: (app: INestApplication, email: string) => Promise<TO
     .send({
       email,
       password: 'Password12',
-    });
-
-  return res.body.data;
-};
-
-export const createRole: (app: INestApplication, name: string) => Promise<TObject> = async (app, name) => {
-  const res = await request(app.getHttpServer())
-    .post('/management/role')
-    .send({
-      name,
-    });
-
-  return res.body.data;
-};
-
-export const createService: (app: INestApplication, name: string) => Promise<TObject> = async (app, name) => {
-  const res = await request(app.getHttpServer())
-    .post('/management/service')
-    .send({
-      name,
     });
 
   return res.body.data;

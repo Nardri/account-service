@@ -19,6 +19,8 @@ export const errorCodesObject = {
   USR_15: 'The ID provide provided is invalid.',
   USR_16: 'Successfully updated data.',
   USR_17: '"name" is required',
+  USR_18: 'Sorry, We could not find any user with the provided ID.',
+  USR_19: 'Sorry, We could not find any role with the provided ID.',
   SEV_01: 'Server error, Please contact the technical team.',
   AUTH_01: 'You are not authorized.',
   AUTH_02: 'You do not have the required permissions.',
