@@ -13,6 +13,7 @@ import {
 } from '../../../e2e/mocksAndUtils';
 import ProfileRepository from '../../profile/profile.repository';
 import ConfigService from '../../config/config.service';
+import UserSchemas from '../user.validation';
 
 describe('User Controller without DB Access.', () => {
   let controller: UserController;
@@ -24,6 +25,7 @@ describe('User Controller without DB Access.', () => {
       controllers: [UserController],
       providers: [
         UserService,
+        UserSchemas,
         {
           provide: ConfigService,
           useValue: configServiceMsgMock,

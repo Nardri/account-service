@@ -53,5 +53,5 @@ class WriteOrmConfig {
 }
 
 new WriteOrmConfig(
-  new ConfigService('.env', errorCodesObject, messageCodeObject),
+  new ConfigService(errorCodesObject, messageCodeObject),
 ).write();

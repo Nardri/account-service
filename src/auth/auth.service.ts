@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { NewUserDTO } from '../user/user.dto';
+import UserEntity from '../user/user.entity';
 import UserService from '../user/user.service';
 import { AuthResponse } from './auth.dto';
-import UserEntity from '../user/user.entity';
 
 @Injectable()
 export default class AuthService {
@@ -15,13 +15,16 @@ export default class AuthService {
 
   private authResponse(user: UserEntity): AuthResponse {
     const payload = {
-      id: user.id,
-      email: user.email,
+      userData: {
+        id: user.id,
+        email: user.email,
+        roleId: user.roleId,
+      },
     };
 
     return {
       data: {
-        email: payload.email,
+        email: user.email,
         accessToken: this.jwtService.sign(payload),
       },
     };

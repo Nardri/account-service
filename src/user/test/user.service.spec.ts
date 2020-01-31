@@ -1,6 +1,6 @@
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 import UserEntity from '../user.entity';
 import UserRepository from '../user.repository';
@@ -13,6 +13,7 @@ import {
 import { IOAuthProfile } from '../user.interface';
 import ProfileRepository from '../../profile/profile.repository';
 import ConfigService from '../../config/config.service';
+import UserSchemas from '../user.validation';
 
 describe('UserService', () => {
   let service: UserService;
@@ -27,6 +28,7 @@ describe('UserService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserService,
+        UserSchemas,
         {
           provide: ConfigService,
           useValue: configServiceMsgMock,
@@ -76,12 +78,11 @@ describe('UserService', () => {
 
   it('should create a user', async done => {
     jest.spyOn(userRepo, 'countUserOccurrence').mockResolvedValue(0);
-
+    jest.spyOn(userRepo, 'findByEmail').mockResolvedValue(userEntity);
     await service.create(userSignUpPayload).then(res => {
       expect(res).toBeInstanceOf(Object);
       expect(res).toHaveProperty('email');
       expect(res).toHaveProperty('password');
-      expect(res).toHaveProperty('profile');
       expect(res.email).toBe(userSignUpPayload.email);
       done();
     });
@@ -100,7 +101,7 @@ describe('UserService', () => {
       });
   });
 
-  it('should return a user entity for the auth service.', async done => {
+  it('should return a user entity for the auth service login.', async done => {
     jest.spyOn(userRepo, 'findByEmail').mockResolvedValue(userEntity);
     jest.spyOn(bcrypt, 'compare').mockResolvedValue(true);
 

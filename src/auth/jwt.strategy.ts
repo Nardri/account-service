@@ -6,8 +6,11 @@ import ConfigService from '../config/config.service';
 import AuthService from './auth.service';
 
 interface IJWTToken {
-  id: string;
-  email: string;
+  userData: {
+    id: string;
+    email: string;
+    role: string;
+  };
   iat?: number;
   exp?: number;
   iss?: string;
@@ -23,8 +26,8 @@ export default class JwtStrategy extends PassportStrategy(Strategy) {
     super(configService.getJwtStrategyOptions());
   }
 
-  async validate(payload: IJWTToken): Promise<IJWTToken> {
-    const userData = await this.authService.validateUser(payload.id);
+  async validate(payload: IJWTToken): Promise<any> {
+    const userData = await this.authService.validateUser(payload.userData.id);
     return { id: userData.id, email: userData.email };
   }
 }
