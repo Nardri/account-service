@@ -8,7 +8,7 @@ import { errorCodesObject, messageCodeObject } from './config.constants';
   providers: [
     {
       provide: ConfigService,
-      useValue: new ConfigService('.env', errorCodesObject, messageCodeObject),
+      useValue: new ConfigService(errorCodesObject, messageCodeObject),
     },
   ],
   exports: [ConfigService],

@@ -5,6 +5,14 @@ import * as morgan from 'morgan';
 import AppModule from './app/app.module';
 
 async function bootstrap(): Promise<void> {
+  /**
+   * This contains a hybrid application (HTTP + gRPC)
+   * You can switch to a microservice with NestFactory.createMicroservice() as follows:
+   *
+   * const app = await NestFactory.createMicroservice(AppModule, grpcClientOptions);
+   * await app.listenAsync();
+   *
+   */
   const app = await NestFactory.create(AppModule);
   const loggerFormat = ':remote-addr - :remote-user [:date[web]] ":method '
     + ':url HTTP/:http-version" :status :res[content-length] '

@@ -7,6 +7,7 @@ import UserService from './user.service';
 import UserRepository from './user.repository';
 import UserEntity from './user.entity';
 import ProfileRepository from '../profile/profile.repository';
+import UserSchemas from './user.validation';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import ProfileRepository from '../profile/profile.repository';
   controllers: [UserController],
   providers: [
     UserService,
+    UserSchemas,
     {
       provide: APP_INTERCEPTOR,
       useClass: ClassSerializerInterceptor,
