@@ -9,6 +9,7 @@ import { NewUserDTO } from '../user.dto';
 import {
   configServiceMsgMock,
   repositoryMockFactory,
+  rmqMock,
 } from '../../../e2e/mocksAndUtils';
 import { IOAuthProfile } from '../user.interface';
 import ProfileRepository from '../../profile/profile.repository';
@@ -40,6 +41,10 @@ describe('UserService', () => {
         {
           provide: getRepositoryToken(ProfileRepository),
           useFactory: repositoryMockFactory,
+        },
+        {
+          provide: 'RMQ_SERVICE',
+          useValue: rmqMock,
         },
       ],
     }).compile();

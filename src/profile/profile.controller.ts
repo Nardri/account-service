@@ -1,7 +1,7 @@
 import {
   Controller, Get, Req, UseGuards, 
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Request } from 'express';
@@ -9,7 +9,7 @@ import { Request } from 'express';
 import ProfileService from './profile.service';
 import { ProfileResponse } from './profile.dto';
 
-@ApiUseTags('Accounts')
+@ApiTags('Accounts')
 @Controller('profile')
 export default class ProfileController {
   constructor(private readonly profileService: ProfileService) {}

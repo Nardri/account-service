@@ -10,6 +10,7 @@ import {
   configServiceMsgMock,
   jwtServiceMock,
   repositoryMockFactory,
+  rmqMock,
 } from '../../../e2e/mocksAndUtils';
 import ProfileRepository from '../../profile/profile.repository';
 import UserEntity from '../../user/user.entity';
@@ -44,6 +45,10 @@ describe('AuthService', () => {
         {
           provide: getRepositoryToken(ProfileRepository),
           useFactory: repositoryMockFactory,
+        },
+        {
+          provide: 'RMQ_SERVICE',
+          useValue: rmqMock,
         },
       ],
       controllers: [AuthController],

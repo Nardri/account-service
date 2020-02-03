@@ -1,19 +1,21 @@
 import {
   ConflictException,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
+import { ClientRMQ } from '@nestjs/microservices';
 
 import ConfigService from '../config/config.service';
 import ProfileEntity from '../profile/profile.entity';
 import ProfileRepository from '../profile/profile.repository';
 import { TUserEntity } from '../shared/base/base.type';
-import normalizeEmail from '../shared/normalizeEmail';
 import { NewUserDTO, UserResponse } from './user.dto';
 import UserEntity from './user.entity';
 import { IOAuthProfile } from './user.interface';
 import UserRepository from './user.repository';
+import normalizeEmail from '../shared/normalizeEmail';
 
 @Injectable()
 export default class UserService {
@@ -21,6 +23,7 @@ export default class UserService {
     private readonly userRepository: UserRepository,
     private readonly profileRepository: ProfileRepository,
     private readonly configService: ConfigService,
+    @Inject('RMQ_SERVICE') private readonly client: ClientRMQ,
   ) {}
 
   private static userResponse(data: TUserEntity | string): UserResponse {
@@ -87,6 +90,7 @@ export default class UserService {
     const newProfile = new ProfileEntity();
     newUser.profile = await this.profileRepository.save(newProfile);
     const savedUser = await this.userRepository.save(newUser);
+    // this.client.emit('user.created', savedUser.id);
     return this.userRepository.findByEmail(savedUser.email);
   }
 
@@ -104,9 +108,10 @@ export default class UserService {
       newProfile.photoUrl = data.picture;
       newProfile.username = data.name;
       newUser.profile = await this.profileRepository.save(newProfile);
-      return this.userRepository.save(newUser);
+      const createdUser = await this.userRepository.save(newUser);
+      // this.client.emit('user.created', createdUser.id);
+      return createdUser;
     }
-
     return user;
   }
 }

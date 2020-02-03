@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiResponse, ApiUseTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import AppService from './app.service';
 
@@ -7,7 +7,7 @@ import AppService from './app.service';
 export default class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @ApiUseTags('App')
+  @ApiTags('App')
   @Get('/health')
   @ApiResponse({ status: 200, description: 'API health check' })
   async health(): Promise<object> {

@@ -132,6 +132,10 @@
     "id-match": "error",
     "import/order": "off",
     "import/no-unresolved": "off",
+    "import/extensions": [
+      "off",
+      "never"
+    ],
     "import/no-extraneous-dependencies": [
       "error",
       {
