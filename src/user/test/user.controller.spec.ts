@@ -10,6 +10,7 @@ import {
   configServiceMsgMock,
   MockType,
   repositoryMockFactory,
+  rmqMock,
 } from '../../../e2e/mocksAndUtils';
 import ProfileRepository from '../../profile/profile.repository';
 import ConfigService from '../../config/config.service';
@@ -37,6 +38,10 @@ describe('User Controller without DB Access.', () => {
         {
           provide: getRepositoryToken(ProfileRepository),
           useFactory: repositoryMockFactory,
+        },
+        {
+          provide: 'RMQ_SERVICE',
+          useValue: rmqMock,
         },
       ],
     }).compile();

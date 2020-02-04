@@ -1,4 +1,4 @@
-import { ApiModelProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 
 import UserEntity from '../user/user.entity';
@@ -7,15 +7,15 @@ import { ServiceAPIResponse } from '../shared/base/base.interface';
 
 // eslint-disable-next-line import/prefer-default-export
 export class ProfileDTO implements Readonly<ProfileDTO> {
-  @ApiModelProperty({ required: true })
+  @ApiProperty({ required: true })
   @IsString()
   username: string;
 
-  @ApiModelProperty({ required: true })
+  @ApiProperty({ required: true })
   @IsString()
   firstName: string;
 
-  @ApiModelProperty({ required: true })
+  @ApiProperty({ required: true })
   @IsString()
   lastName: string;
 
@@ -25,7 +25,7 @@ export class ProfileDTO implements Readonly<ProfileDTO> {
   @IsString()
   phone?: string;
 
-  @ApiModelProperty({ required: true })
+  @ApiProperty({ required: true })
   @IsString()
   gender: Gender;
 

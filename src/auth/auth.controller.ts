@@ -8,7 +8,7 @@ import {
   UseGuards,
   HttpCode,
 } from '@nestjs/common';
-import { ApiUseTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Request, Response } from 'express';
@@ -19,7 +19,7 @@ import AuthService from './auth.service';
 import { AuthResponse } from './auth.dto';
 import { validateWithJoi } from '../shared/util';
 
-@ApiUseTags('Authorization')
+@ApiTags('Authorization')
 @Controller('auth')
 export default class AuthController {
   constructor(
@@ -44,6 +44,7 @@ export default class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleLogin(): Promise<void> {}
 
+  /* eslint-disable */
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleCallBack(
@@ -52,4 +53,5 @@ export default class AuthController {
   ): Promise<any> {
     res.status(200).json(req.user);
   }
+  /* eslint-enable */
 }

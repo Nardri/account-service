@@ -3,6 +3,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as morgan from 'morgan';
 
 import AppModule from './app/app.module';
+import rabbitMqClientOptions from './config/rabbitMq-client.options';
 
 async function bootstrap(): Promise<void> {
   /**
@@ -13,7 +14,10 @@ async function bootstrap(): Promise<void> {
    * await app.listenAsync();
    *
    */
+
   const app = await NestFactory.create(AppModule);
+  app.connectMicroservice(rabbitMqClientOptions);
+
   const loggerFormat = ':remote-addr - :remote-user [:date[web]] ":method '
     + ':url HTTP/:http-version" :status :res[content-length] '
     + '":referrer" ":user-agent';
@@ -30,6 +34,7 @@ async function bootstrap(): Promise<void> {
   SwaggerModule.setup('docs', app, document);
 
   await app.listen(3000);
+  await app.startAllMicroservicesAsync();
 }
 
 bootstrap().then();

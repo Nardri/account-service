@@ -46,6 +46,8 @@ export const configServiceMsgMock = {
   getMsg: (key): string => (messageCodeObject[key] ? messageCodeObject[key] : 'Invalid'),
 };
 
+export const rmqMock = {};
+
 export const createAndMigrateApp: () => Promise<INestApplication> = async () => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],

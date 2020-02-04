@@ -1,12 +1,12 @@
-import { ApiModelProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 import { ServiceAPIResponse } from '../shared/base/base.interface';
 
 export class AuthDTO {
-  @ApiModelProperty()
+  @ApiProperty()
   email: string;
 
-  @ApiModelProperty()
+  @ApiProperty()
   accessToken: string;
 }
 

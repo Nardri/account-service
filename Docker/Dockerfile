@@ -1,31 +1,47 @@
-ARG NODE_VERSION=13.7-slim
+############################
+# Base envoy alpine image #
+###########################
+FROM envoyproxy/envoy-alpine:latest AS base_image
 
-FROM node:${NODE_VERSION} AS base
+# install required packages
+RUN apk update && apk add --no-cache netcat-openbsd \
+  && apk add --update nodejs npm
 
-FROM base AS builder
-
-WORKDIR /build
-
-COPY ./package* ./
-
-COPY ./yarn.lock ./
-
-RUN yarn install --frozen-lockfile
-
-
-FROM base
-
-RUN apt-get update && apt-get install -y netcat
-
-WORKDIR /usr/src/app
-
-COPY --from=builder /build/node_modules /usr/src/app/node_modules
-
-COPY --from=envoyproxy/envoy:latest /usr/local/bin/envoy /usr/local/bin/envoy
+# copy envoy config
 COPY ./Docker/envoy.yaml /etc/envoy/envoy.yaml
 
+
+############################
+#     Dependency Build    #
+###########################
+FROM base_image AS builder
+
+# set build directory
+WORKDIR /build
+
+# copy package.json
+COPY ./package*.json ./
+
+# install dependencies
+RUN npm install
+
+
+############################
+#    Main App Build       #
+###########################
+FROM base_image
+
+# set app directory
+WORKDIR /usr/src/app
+
+# copy node modules from previous build to this build
+COPY --from=builder /build/node_modules /usr/src/app/node_modules
+
+# copy the rest of the application
 COPY . .
 
+# make the entrypoint scriot executable
 RUN chmod +x ./Docker/entrypoint.sh
 
+# set the docker command
 CMD sh ./Docker/entrypoint.sh
