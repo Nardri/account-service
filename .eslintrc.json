@@ -201,7 +201,7 @@
       "error"
     ],
     "no-unsafe-finally": "error",
-    "no-unused-expressions": "error",
+    "no-unused-expressions": ["error", { "allowShortCircuit": true }],
     "no-unused-labels": "error",
     "no-useless-constructor": "off",
     "no-restricted-syntax": "off",

@@ -3,6 +3,9 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.dto.ts",
-    "src/**/*.filter.ts"
+    "src/**/*.filter.ts",
+    "src/**/*.options.ts",
+    "src/**/*.e2e-spec.ts",
+    "src/**/*.spec.ts"
   ]
 }

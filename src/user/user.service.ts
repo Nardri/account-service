@@ -1,11 +1,9 @@
 import {
   ConflictException,
-  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
-import { ClientRMQ } from '@nestjs/microservices';
 
 import ConfigService from '../config/config.service';
 import ProfileEntity from '../profile/profile.entity';
@@ -16,15 +14,20 @@ import UserEntity from './user.entity';
 import { IOAuthProfile } from './user.interface';
 import UserRepository from './user.repository';
 import normalizeEmail from '../shared/normalizeEmail';
+// import RabbitMQClient from '../rabbitMQ/rabbitMQ.client';
+// import { customRabbitMqClientOptions } from '../config/rabbitMq-client.options';
 
 @Injectable()
 export default class UserService {
+  // private client: RabbitMQClient;
+
   constructor(
     private readonly userRepository: UserRepository,
     private readonly profileRepository: ProfileRepository,
     private readonly configService: ConfigService,
-    @Inject('RMQ_SERVICE') private readonly client: ClientRMQ,
-  ) {}
+  ) {
+    // this.client = new RabbitMQClient(customRabbitMqClientOptions);
+  }
 
   private static userResponse(data: TUserEntity | string): UserResponse {
     return {
@@ -67,6 +70,7 @@ export default class UserService {
       throw new UnauthorizedException(this.configService.getErrorMsg('USR_06'));
     }
 
+    // await this.client.publishEvent('nadri.rbac.role.default', user.id);
     return user;
   }
 
@@ -90,7 +94,6 @@ export default class UserService {
     const newProfile = new ProfileEntity();
     newUser.profile = await this.profileRepository.save(newProfile);
     const savedUser = await this.userRepository.save(newUser);
-    // this.client.emit('user.created', savedUser.id);
     return this.userRepository.findByEmail(savedUser.email);
   }
 
@@ -109,7 +112,6 @@ export default class UserService {
       newProfile.username = data.name;
       newUser.profile = await this.profileRepository.save(newProfile);
       const createdUser = await this.userRepository.save(newUser);
-      // this.client.emit('user.created', createdUser.id);
       return createdUser;
     }
     return user;

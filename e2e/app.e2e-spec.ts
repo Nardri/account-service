@@ -16,7 +16,7 @@ describe('AppController (e2e)', () => {
 
   it('/ (GET)', async (done) => {
     await request(app.getHttpServer())
-      .get('/health')
+      .get('/')
       .expect(200)
       .expect(res => {
         expect(res.body).toStrictEqual({ status: 'ok' });

@@ -3,20 +3,23 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as morgan from 'morgan';
 
 import AppModule from './app/app.module';
-import rabbitMqClientOptions from './config/rabbitMq-client.options';
+// import { customRabbitMqClientOptions } from './config/rabbitMq-client.options';
+// import RabbitMQServer from './rabbitMQ/rabbitMQ.server';
 
 async function bootstrap(): Promise<void> {
   /**
-   * This contains a hybrid application (HTTP + gRPC)
+   * This contains a hybrid application (HTTP + AMQP)
    * You can switch to a microservice with NestFactory.createMicroservice() as follows:
    *
-   * const app = await NestFactory.createMicroservice(AppModule, grpcClientOptions);
+   * const app = await NestFactory.createMicroservice(AppModule, rabbitMqClientOptions);
    * await app.listenAsync();
    *
    */
 
   const app = await NestFactory.create(AppModule);
-  app.connectMicroservice(rabbitMqClientOptions);
+  // app.connectMicroservice({
+  //   strategy: new RabbitMQServer(customRabbitMqClientOptions),
+  // });
 
   const loggerFormat = ':remote-addr - :remote-user [:date[web]] ":method '
     + ':url HTTP/:http-version" :status :res[content-length] '
@@ -34,7 +37,7 @@ async function bootstrap(): Promise<void> {
   SwaggerModule.setup('docs', app, document);
 
   await app.listen(3000);
-  await app.startAllMicroservicesAsync();
+  // await app.startAllMicroservicesAsync();
 }
 
 bootstrap().then();
