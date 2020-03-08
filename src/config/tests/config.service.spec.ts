@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { JwtModuleOptions } from '@nestjs/jwt';
 
 import ConfigService from '../config.service';
 import { errorCodesObject, messageCodeObject } from '../config.constants';
@@ -43,7 +44,7 @@ describe('ConfigService', () => {
   });
 
   it('should return JWT config ', async () => {
-    const expected = {
+    const expected: JwtModuleOptions = {
       signOptions: {
         algorithm: 'RS512',
         expiresIn: service.get('JWT_EXPIRE_IN'),

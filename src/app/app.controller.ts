@@ -8,7 +8,7 @@ export default class AppController {
   constructor(private readonly appService: AppService) {}
 
   @ApiTags('App')
-  @Get('/health')
+  @Get('/')
   @ApiResponse({ status: 200, description: 'API health check' })
   async health(): Promise<object> {
     return this.appService.health();

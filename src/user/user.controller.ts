@@ -1,12 +1,7 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-// import {
-//   Ctx,
-//   EventPattern,
-//   Payload,
-//   RmqContext,
-// } from '@nestjs/microservices';
+// import { Ctx, EventPattern, Payload } from '@nestjs/microservices';
 
 import UserService from './user.service';
 import { UserDTO } from './user.dto';
@@ -33,12 +28,10 @@ export default class UserController {
     return this.userService.findAll();
   }
 
-  // @EventPattern('default.user.role.fetched')
-  // async handleUserRoleAssignment(@Payload() data: Record<string, unknown>, @Ctx() context: RmqContext): Promise<any> {
+  // @EventPattern('nadri.account.role.default')
+  // async handleUserRoleAssignment(@Payload() _data: Record<string, unknown>, @Ctx() context: any): Promise<any> {
   //   const channel = context.getChannelRef();
-  //   const messsage = context.getMesssage();
-  //   // console.log(messsage.fields);
-  //   // console.log(data);
-  //   // channel.ack(messsage);
+  //   const message = context.getMessage();
+  //   channel.ack(message);
   // }
 }
